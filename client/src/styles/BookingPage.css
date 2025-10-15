@@ -1,0 +1,181 @@
+.booking-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.booking-container {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.booking-main {
+  background-color: var(--bg-primary);
+  padding: 2rem;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.booking-main h1 {
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+}
+
+.booking-section {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.booking-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 1.5rem;
+}
+
+.booking-section h2 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Payment Methods */
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  background-color: var(--bg-primary);
+}
+
+.payment-option:hover {
+  border-color: var(--primary-light);
+  background-color: var(--bg-secondary);
+}
+
+.payment-option input[type="radio"] {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary-color);
+}
+
+.payment-option input[type="radio"]:checked + .payment-details {
+  color: var(--primary-color);
+}
+
+.payment-option:has(input:checked) {
+  border-color: var(--primary-color);
+  background-color: var(--primary-light);
+}
+
+.payment-details {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.payment-icon {
+  font-size: 1.5rem;
+}
+
+.payment-label {
+  font-weight: 600;
+}
+
+/* Terms Checkbox */
+.terms-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: var(--border-radius);
+}
+
+.terms-checkbox input[type="checkbox"] {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: var(--primary-color);
+}
+
+.terms-checkbox span {
+  line-height: 1.6;
+}
+
+.terms-checkbox a {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+/* Booking Actions */
+.booking-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.booking-sidebar {
+  position: sticky;
+  top: 90px;
+}
+
+.error-message {
+  text-align: center;
+  padding: 3rem;
+}
+
+.error-message h2 {
+  color: var(--danger-color);
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 992px) {
+  .booking-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .booking-sidebar {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .booking-page {
+    padding: 1rem;
+  }
+  
+  .booking-main {
+    padding: 1.5rem;
+  }
+  
+  .payment-methods {
+    grid-template-columns: 1fr;
+  }
+  
+  .booking-actions {
+    flex-direction: column;
+  }
+  
+  .booking-actions button {
+    width: 100%;
+  }
+}
+

@@ -1,0 +1,184 @@
+.search-form {
+  background: linear-gradient(to bottom, var(--bg-primary), rgba(225, 190, 231, 0.1));
+  padding: 2rem;
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 10px 30px rgba(156, 39, 176, 0.15);
+  max-width: 900px;
+  margin: 0 auto;
+  border: 2px solid var(--primary-light);
+}
+
+.search-form.inline {
+  max-width: 100%;
+  margin-bottom: 2rem;
+}
+
+.search-form .form-group label {
+  color: var(--primary-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-form .form-group label::before {
+  content: '●';
+  color: var(--primary-color);
+  font-size: 0.6rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: end;
+}
+
+.form-row:last-child {
+  grid-template-columns: 1fr 1fr;
+}
+
+.swap-button {
+  background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+  color: var(--text-light);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+  transition: var(--transition);
+  border: 3px solid var(--primary-color);
+  box-shadow: 0 4px 10px rgba(156, 39, 176, 0.3);
+  font-weight: 700;
+}
+
+.swap-button:hover {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border-color: var(--primary-dark);
+  transform: rotate(180deg) scale(1.1);
+  box-shadow: 0 6px 15px rgba(156, 39, 176, 0.5);
+}
+
+.swap-button:active {
+  transform: rotate(180deg) scale(0.95);
+}
+
+.search-button {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: var(--text-light);
+  padding: 1rem 2rem;
+  border-radius: var(--border-radius-lg);
+  font-size: 1.1rem;
+  font-weight: 700;
+  width: 100%;
+  transition: var(--transition);
+  border: none;
+  box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.search-button:hover {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(156, 39, 176, 0.5);
+}
+
+.search-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+}
+
+/* Stiluri personalizate pentru input date */
+.form-group input[type="date"] {
+  position: relative;
+  font-family: inherit;
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-left: 0.5rem;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition);
+  filter: invert(53%) sepia(70%) saturate(4478%) hue-rotate(274deg) brightness(85%) contrast(93%);
+}
+
+.form-group input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  background-color: var(--primary-light);
+  transform: scale(1.1);
+}
+
+/* Stiluri pentru calendar dropdown */
+input[type="date"]::-webkit-datetime-edit {
+  padding: 0.25rem;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: var(--text-secondary);
+  padding: 0 0.25rem;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: var(--text-primary);
+  background-color: var(--primary-light);
+  border-radius: var(--border-radius-sm);
+  padding: 0.25rem 0.5rem;
+  margin: 0 0.125rem;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field:hover,
+input[type="date"]::-webkit-datetime-edit-day-field:hover,
+input[type="date"]::-webkit-datetime-edit-year-field:hover {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-day-field:focus,
+input[type="date"]::-webkit-datetime-edit-year-field:focus {
+  background-color: var(--primary-dark);
+  color: var(--text-light);
+  outline: none;
+}
+
+/* Firefox */
+input[type="date"]::-moz-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(53%) sepia(70%) saturate(4478%) hue-rotate(274deg) brightness(85%) contrast(93%);
+}
+
+@media (max-width: 768px) {
+  .search-form {
+    padding: 1.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .form-row:last-child {
+    grid-template-columns: 1fr;
+  }
+  
+  .swap-button {
+    display: none;
+  }
+}
+
