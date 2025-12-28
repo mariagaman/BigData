@@ -132,9 +132,6 @@ const Login = () => {
                 <input type="checkbox" />
                 <span>Ține-mă minte</span>
               </label>
-              <Link to="/forgot-password" className="forgot-link">
-                Ai uitat parola?
-              </Link>
             </div>
 
             <button 
@@ -152,21 +149,6 @@ const Login = () => {
               )}
             </button>
           </form>
-
-          <div className="auth-divider">
-            <span>sau</span>
-          </div>
-
-          <div className="social-login">
-            <button className="social-btn google">
-              <span>🔵</span>
-              Continuă cu Google
-            </button>
-            <button className="social-btn facebook">
-              <span>🔷</span>
-              Continuă cu Facebook
-            </button>
-          </div>
 
           <div className="auth-footer">
             <p>

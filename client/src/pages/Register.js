@@ -240,9 +240,9 @@ const Register = () => {
                 />
                 <span>
                   Sunt de acord cu{' '}
-                  <a href="#terms" target="_blank">termenii și condițiile</a>
+                  <Link to="/terms">termenii și condițiile</Link>
                   {' '}și{' '}
-                  <a href="#privacy" target="_blank">politica de confidențialitate</a>
+                  <Link to="/privacy">politica de confidențialitate</Link>
                 </span>
               </label>
               {errors.terms && <span className="error-message">{errors.terms}</span>}
@@ -263,21 +263,6 @@ const Register = () => {
               )}
             </button>
           </form>
-
-          <div className="auth-divider">
-            <span>sau</span>
-          </div>
-
-          <div className="social-login">
-            <button className="social-btn google">
-              <span>🔵</span>
-              Înregistrează-te cu Google
-            </button>
-            <button className="social-btn facebook">
-              <span>🔷</span>
-              Înregistrează-te cu Facebook
-            </button>
-          </div>
 
           <div className="auth-footer">
             <p>

@@ -10,8 +10,13 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import SearchResults from './pages/SearchResults';
 import BookingPage from './pages/BookingPage';
+import PaymentPage from './pages/PaymentPage';
 import ConfirmationPage from './pages/ConfirmationPage';
 import MyBookings from './pages/MyBookings';
+import ProfilePage from './pages/ProfilePage';
+import TicketPage from './pages/TicketPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 import './styles/App.css';
 
 function App() {
@@ -36,6 +41,14 @@ function App() {
                   } 
                 />
                 <Route 
+                  path="/payment" 
+                  element={
+                    <ProtectedRoute>
+                      <PaymentPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
                   path="/confirmation" 
                   element={
                     <ProtectedRoute>
@@ -51,6 +64,24 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
+                <Route 
+                  path="/profile" 
+                  element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/ticket/:bookingId" 
+                  element={
+                    <ProtectedRoute>
+                      <TicketPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
               </Routes>
             </main>
             <Footer />

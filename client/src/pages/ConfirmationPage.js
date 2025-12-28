@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
+import SearchForm from '../components/SearchForm';
 import '../styles/ConfirmationPage.css';
 
 const ConfirmationPage = () => {
@@ -40,6 +41,10 @@ const ConfirmationPage = () => {
   return (
     <div className="confirmation-page">
       <div className="confirmation-container">
+        <div className="search-form-section">
+          <SearchForm inline={true} />
+        </div>
+
         <div className="success-icon">✅</div>
         
         <h1>Rezervare confirmată!</h1>

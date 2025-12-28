@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import { getTrainById } from '../services/api';
 import BookingSummary from '../components/BookingSummary';
@@ -67,7 +67,8 @@ const BookingPage = () => {
       return;
     }
 
-    const booking = {
+    // Salvează datele pasagerilor temporar în context
+    const bookingData = {
       train,
       passengers,
       paymentMethod,
@@ -75,8 +76,12 @@ const BookingPage = () => {
       searchParams
     };
 
-    const confirmedBooking = createBooking(booking);
-    navigate('/confirmation');
+    // Salvează datele temporare pentru pagina de plată
+    // (ar trebui să fie în context sau state management)
+    sessionStorage.setItem('pendingBooking', JSON.stringify(bookingData));
+    
+    // Navighează la pagina de plată
+    navigate('/payment');
   };
 
   if (loading) {
@@ -181,9 +186,9 @@ const BookingPage = () => {
                 />
                 <span>
                   Sunt de acord cu{' '}
-                  <a href="#terms" target="_blank">termenii și condițiile</a>
+                  <Link to="/terms">termenii și condițiile</Link>
                   {' '}și{' '}
-                  <a href="#privacy" target="_blank">politica de confidențialitate</a>
+                  <Link to="/privacy">politica de confidențialitate</Link>
                 </span>
               </label>
             </section>
@@ -197,7 +202,7 @@ const BookingPage = () => {
                 Înapoi
               </button>
               <button type="submit" className="btn-primary">
-                Confirmă și plătește
+                Continuă la plată
               </button>
             </div>
           </form>

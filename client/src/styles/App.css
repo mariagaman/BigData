@@ -152,6 +152,18 @@ button:disabled:hover {
 .form-group input.error,
 .form-group select.error {
   border-color: var(--danger-color);
+  background-color: var(--bg-primary);
+}
+
+.form-group select.error:hover {
+  border-color: var(--danger-color);
+  background-color: var(--bg-primary);
+}
+
+.form-group select.error:focus {
+  border-color: var(--danger-color);
+  background-color: var(--bg-primary);
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
 }
 
 .error-message {

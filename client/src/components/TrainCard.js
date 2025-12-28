@@ -1,9 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import '../styles/TrainCard.css';
 
 const TrainCard = ({ train }) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const formatTime = (time) => {
     return new Date(time).toLocaleTimeString('ro-RO', { 
@@ -30,6 +32,11 @@ const TrainCard = ({ train }) => {
   };
 
   const handleBooking = () => {
+    if (!isAuthenticated) {
+      // Dacă nu este autentificat, redirecționează la login cu locația curentă
+      navigate('/login', { state: { from: { pathname: `/booking/${train.id}` } } });
+      return;
+    }
     navigate(`/booking/${train.id}`);
   };
 

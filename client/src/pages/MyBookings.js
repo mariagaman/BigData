@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import '../styles/MyBookings.css';
 
@@ -136,9 +136,9 @@ const MyBookings = () => {
                 </div>
 
                 <div className="booking-actions">
-                  <button className="btn-outline">
-                    📥 Descarcă bilet
-                  </button>
+                  <Link to={`/ticket/${booking.id}`} className="btn-primary">
+                    🎫 Vezi bilet
+                  </Link>
                   {isUpcoming(booking) && (
                     <button 
                       className="btn-danger"

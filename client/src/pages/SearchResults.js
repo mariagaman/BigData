@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
+import { useAuth } from '../context/AuthContext';
 import { searchTrains } from '../services/api';
 import SearchForm from '../components/SearchForm';
 import TrainCard from '../components/TrainCard';
@@ -7,6 +9,7 @@ import '../styles/SearchResults.css';
 
 const SearchResults = () => {
   const { searchParams, selectTrain } = useBooking();
+  const { isAuthenticated } = useAuth();
   const [trains, setTrains] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('time');
@@ -176,8 +179,21 @@ const SearchResults = () => {
             </div>
           ) : sortedTrains.length > 0 ? (
             <>
+              <div className="results-header">
               <div className="results-count">
                 Găsite {sortedTrains.length} {sortedTrains.length === 1 ? 'tren' : 'trenuri'}
+                </div>
+                {!isAuthenticated && (
+                  <div className="auth-notice">
+                    <span className="notice-icon">ℹ️</span>
+                    <span className="notice-text">
+                      Pentru a rezerva bilete, te rugăm să te{' '}
+                      <Link to="/login" className="notice-link">conectezi</Link>
+                      {' '}sau să te{' '}
+                      <Link to="/register" className="notice-link">înregistrezi</Link>.
+                    </span>
+                  </div>
+                )}
               </div>
               {sortedTrains.map((train) => (
                 <TrainCard 

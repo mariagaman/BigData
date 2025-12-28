@@ -4,7 +4,17 @@ import '../styles/DatePicker.css';
 const DatePicker = ({ value, onChange, min, className, id, name }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(value ? new Date(value) : null);
+  
+  // Inițializăm selectedDate corect pentru a evita problemele cu timezone
+  const getInitialDate = () => {
+    if (!value) return null;
+    const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  };
+  
+  const [selectedDate, setSelectedDate] = useState(getInitialDate());
   const calendarRef = useRef(null);
 
   const months = [
@@ -27,7 +37,10 @@ const DatePicker = ({ value, onChange, min, className, id, name }) => {
 
   useEffect(() => {
     if (value) {
-      const date = new Date(value);
+      // Parsează data din format YYYY-MM-DD și o creează în timezone-ul local
+      const [year, month, day] = value.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      date.setHours(0, 0, 0, 0);
       setSelectedDate(date);
       setCurrentMonth(date);
     }
@@ -84,19 +97,25 @@ const DatePicker = ({ value, onChange, min, className, id, name }) => {
   };
 
   const handleDateSelect = (date) => {
+    // Setăm ora la 0 în timezone-ul local pentru a evita problemele cu timezone
+    const localDate = new Date(date);
+    localDate.setHours(0, 0, 0, 0);
+    
     if (min) {
       const minDate = new Date(min);
       minDate.setHours(0, 0, 0, 0);
-      const selectedDateTime = new Date(date);
-      selectedDateTime.setHours(0, 0, 0, 0);
       
-      if (selectedDateTime < minDate) {
+      if (localDate < minDate) {
         return;
       }
     }
 
-    setSelectedDate(date);
-    const formattedDate = date.toISOString().split('T')[0];
+    setSelectedDate(localDate);
+    // Formatăm data manual pentru a evita problemele cu timezone-ul UTC
+    const year = localDate.getFullYear();
+    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+    const day = String(localDate.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
     onChange({ target: { name, value: formattedDate } });
     setIsOpen(false);
   };

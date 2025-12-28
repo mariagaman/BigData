@@ -110,10 +110,47 @@
   min-height: 400px;
 }
 
+.results-header {
+  margin-bottom: 1.5rem;
+}
+
 .results-count {
   color: var(--text-secondary);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   font-size: 1rem;
+}
+
+.auth-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: var(--border-radius);
+  margin-bottom: 1rem;
+}
+
+.notice-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.notice-text {
+  color: #1976d2;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.notice-link {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: underline;
+  transition: var(--transition);
+}
+
+.notice-link:hover {
+  color: var(--primary-dark);
 }
 
 .no-results {

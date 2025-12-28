@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import DatePicker from './DatePicker';
@@ -6,16 +6,28 @@ import '../styles/SearchForm.css';
 
 const SearchForm = ({ inline = false }) => {
   const navigate = useNavigate();
-  const { updateSearchParams } = useBooking();
+  const { searchParams, updateSearchParams } = useBooking();
   
   const [formData, setFormData] = useState({
-    from: '',
-    to: '',
-    date: '',
-    passengers: 1
+    from: searchParams.from || '',
+    to: searchParams.to || '',
+    date: searchParams.date || '',
+    passengers: searchParams.passengers || 1
   });
 
   const [errors, setErrors] = useState({});
+
+  // Actualizăm formData când searchParams se schimbă
+  useEffect(() => {
+    if (searchParams.from || searchParams.to || searchParams.date) {
+      setFormData({
+        from: searchParams.from || '',
+        to: searchParams.to || '',
+        date: searchParams.date || '',
+        passengers: searchParams.passengers || 1
+      });
+    }
+  }, [searchParams]);
 
   const cities = [
     'București Nord',
@@ -87,48 +99,48 @@ const SearchForm = ({ inline = false }) => {
 
   return (
     <form className={`search-form ${inline ? 'inline' : ''}`} onSubmit={handleSubmit}>
-      <div className="form-row">
+      <div className="form-row-top">
         <div className="form-group">
-          <label htmlFor="from">Plecare din</label>
-          <select
-            id="from"
-            name="from"
-            value={formData.from}
-            onChange={handleChange}
-            className={errors.from ? 'error' : ''}
-          >
-            <option value="">Selectează orașul</option>
-            {cities.map(city => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
-          {errors.from && <span className="error-message">{errors.from}</span>}
-        </div>
+          <div className="labels-row">
+            <label htmlFor="from">Plecare din</label>
+            <label htmlFor="to">Sosire în</label>
+          </div>
+          <div className="inputs-row">
+            <select
+              id="from"
+              name="from"
+              value={formData.from}
+              onChange={handleChange}
+              className={errors.from ? 'error' : ''}
+            >
+              <option value="">Selectează orașul</option>
+              {cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
 
-        <button 
-          type="button" 
-          className="swap-button" 
-          onClick={swapCities}
-          title="Inversează orașele"
-        >
-          ⇄
-        </button>
+            <button 
+              type="button" 
+              className="swap-button" 
+              onClick={swapCities}
+              title="Inversează orașele"
+            >
+              ⇄
+            </button>
 
-        <div className="form-group">
-          <label htmlFor="to">Sosire în</label>
-          <select
-            id="to"
-            name="to"
-            value={formData.to}
-            onChange={handleChange}
-            className={errors.to ? 'error' : ''}
-          >
-            <option value="">Selectează orașul</option>
-            {cities.map(city => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
-          {errors.to && <span className="error-message">{errors.to}</span>}
+            <select
+              id="to"
+              name="to"
+              value={formData.to}
+              onChange={handleChange}
+              className={errors.to ? 'error' : ''}
+            >
+              <option value="">Selectează orașul</option>
+              {cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -143,7 +155,6 @@ const SearchForm = ({ inline = false }) => {
             min={new Date().toISOString().split('T')[0]}
             className={errors.date ? 'error' : ''}
           />
-          {errors.date && <span className="error-message">{errors.date}</span>}
         </div>
 
         <div className="form-group">
