@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useBooking } from '../context/BookingContext';
+import { getBookingById } from '../services/api';
+import jsPDF from 'jspdf';
+import QRCodeLib from 'qrcode';
 import '../styles/TicketPage.css';
 
 // Component simplu pentru generarea QR code (folosind un serviciu online)
@@ -16,17 +18,49 @@ const QRCode = ({ value }) => {
 const TicketPage = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
-  const { userBookings } = useBooking();
+  const [booking, setBooking] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const booking = userBookings.find(b => b.id === parseInt(bookingId));
+  useEffect(() => {
+    const fetchBooking = async () => {
+      try {
+        setLoading(true);
+        const bookingData = await getBookingById(bookingId);
+        setBooking(bookingData);
+      } catch (error) {
+        console.error('Error fetching booking:', error);
+        setError(error.message || 'Biletul nu a fost găsit');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!booking) {
+    if (bookingId) {
+      fetchBooking();
+    }
+  }, [bookingId]);
+
+  if (loading) {
+    return (
+      <div className="ticket-page">
+        <div className="ticket-container">
+          <div className="loading">
+            <div className="spinner"></div>
+            <p>Se încarcă biletul...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !booking) {
     return (
       <div className="ticket-page">
         <div className="ticket-container">
           <div className="error-message">
             <h2>Biletul nu a fost găsit</h2>
-            <p>Biletul căutat nu există sau nu ai acces la el.</p>
+            <p>{error || 'Biletul căutat nu există sau nu ai acces la el.'}</p>
             <button className="btn-primary" onClick={() => navigate('/my-bookings')}>
               Înapoi la biletele mele
             </button>
@@ -61,23 +95,242 @@ const TicketPage = () => {
   };
 
   // Generăm un cod unic pentru bilet
-  const ticketCode = `RAILMATE-${booking.id}-${booking.train.trainNumber}-${formatDateShort(booking.train.departureTime).replace(/\//g, '')}`;
+  const ticketCode = booking.bookingNumber || `RAILMATE-${booking.id}-${booking.train.trainNumber}-${formatDateShort(booking.train.departureTime).replace(/\//g, '')}`;
+  
+  // Date pentru QR code - folosim bookingNumber ca identificator principal
   const qrData = JSON.stringify({
     bookingId: booking.id,
+    bookingNumber: booking.bookingNumber || booking.id,
     trainNumber: booking.train.trainNumber,
     from: booking.train.from,
     to: booking.train.to,
     date: booking.train.departureTime,
     code: ticketCode
   });
+  
+  // Generează URL pentru QR code dacă nu există deja
+  const qrCodeUrl = booking.qrCode || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
 
   const handlePrint = () => {
     window.print();
   };
 
-  const handleDownload = () => {
-    // Simulare descărcare PDF
-    alert('Funcționalitatea de descărcare PDF va fi implementată în curând!');
+  // Funcție pentru eliminarea diacriticelor
+  const removeDiacritics = (str) => {
+    if (!str) return '';
+    return str
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/ă/g, 'a')
+      .replace(/â/g, 'a')
+      .replace(/î/g, 'i')
+      .replace(/ș/g, 's')
+      .replace(/ț/g, 't')
+      .replace(/Ă/g, 'A')
+      .replace(/Â/g, 'A')
+      .replace(/Î/g, 'I')
+      .replace(/Ș/g, 'S')
+      .replace(/Ț/g, 'T');
+  };
+
+  const handleDownload = async () => {
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Culori
+      const primaryColor = [138, 43, 226]; // Purple
+      const textColor = [50, 50, 50];
+      const lightGray = [240, 240, 240];
+
+      // Header cu logo și număr bilet
+      doc.setFillColor(...primaryColor);
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RailMate', 15, 20);
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Bilet #${booking.bookingNumber || booking.id}`, 150, 20);
+      const statusText = booking.status === 'confirmed' ? 'Confirmat' : 
+                        booking.status === 'cancelled' ? 'Anulat' : booking.status;
+      doc.text(`Status: ${removeDiacritics(statusText)}`, 150, 28);
+
+      // Resetare culoare text
+      doc.setTextColor(...textColor);
+      let yPos = 50;
+
+      // Informații despre traseu
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Detalii calatorie', 15, yPos);
+      yPos += 10;
+
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      
+      // Plecare
+      doc.setFillColor(...lightGray);
+      doc.rect(15, yPos, 85, 30, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.text('PLECARE', 20, yPos + 8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(removeDiacritics(booking.train.from), 20, yPos + 15);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text(formatTime(booking.train.departureTime), 20, yPos + 22);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(removeDiacritics(formatDate(booking.train.departureTime)), 20, yPos + 28);
+
+      // Sosire
+      doc.setFillColor(...lightGray);
+      doc.rect(110, yPos, 85, 30, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.text('SOSIRE', 115, yPos + 8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(removeDiacritics(booking.train.to), 115, yPos + 15);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text(formatTime(booking.train.arrivalTime), 115, yPos + 22);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(removeDiacritics(formatDate(booking.train.arrivalTime)), 115, yPos + 28);
+
+      yPos += 40;
+
+      // Detalii tren
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Detalii tren', 15, yPos);
+      yPos += 8;
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Tren: ${booking.train.type} ${booking.train.trainNumber}`, 15, yPos);
+      yPos += 7;
+      doc.text(`Pasageri: ${booking.passengers.length}`, 15, yPos);
+      yPos += 7;
+      doc.text(`Pret total: ${booking.totalPrice} RON`, 15, yPos);
+      yPos += 7;
+      const bookingDateStr = new Date(booking.bookingDate).toLocaleDateString('ro-RO');
+      doc.text(`Data rezervarii: ${removeDiacritics(bookingDateStr)}`, 15, yPos);
+
+      yPos += 15;
+
+      // QR Code
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Cod QR Bilet', 15, yPos);
+      yPos += 8;
+
+      // Generează QR code-ul direct
+      try {
+        // Generează QR code-ul ca data URL (base64)
+        const qrDataString = booking.bookingNumber || booking.id.toString();
+        const qrDataUrl = await QRCodeLib.toDataURL(qrDataString, {
+          width: 200,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
+        });
+
+        // Adaugă QR code-ul în PDF
+        doc.addImage(qrDataUrl, 'PNG', 15, yPos, 40, 40);
+        
+        // Adaugă codul biletului lângă QR code
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Cod bilet: ${booking.bookingNumber || booking.id}`, 60, yPos + 20);
+      } catch (error) {
+        console.error('Error generating QR code:', error);
+        // Fallback - doar text
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Cod bilet: ${booking.bookingNumber || booking.id}`, 15, yPos + 5);
+      }
+
+      yPos += 50;
+
+      // Lista pasagerilor
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Pasageri', 15, yPos);
+      yPos += 8;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      
+      booking.passengers.forEach((passenger, index) => {
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        // Calculează înălțimea necesară pentru acest pasager
+        let passengerHeight = 8; // Înălțime minimă
+        if (passenger.email) passengerHeight += 5;
+        if (passenger.phone) passengerHeight += 5;
+        if (passenger.wagonNumber && passenger.seatNumber) passengerHeight += 5;
+        
+        // Desenează fundalul gri pentru întreaga secțiune
+        doc.setFillColor(...lightGray);
+        doc.rect(15, yPos - 5, 180, passengerHeight, 'F');
+        
+        // Nume pasager
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${index + 1}. ${removeDiacritics(passenger.firstName)} ${removeDiacritics(passenger.lastName)}`, 20, yPos + 3);
+        doc.setFont('helvetica', 'normal');
+        
+        let passengerY = yPos + 8;
+        if (passenger.email) {
+          doc.text(`Email: ${passenger.email}`, 20, passengerY);
+          passengerY += 5;
+        }
+        if (passenger.phone) {
+          doc.text(`Telefon: ${passenger.phone}`, 20, passengerY);
+          passengerY += 5;
+        }
+        if (passenger.wagonNumber && passenger.seatNumber) {
+          doc.text(`Vagon: ${passenger.wagonNumber}, Loc: ${passenger.seatNumber}`, 20, passengerY);
+          passengerY += 5;
+        }
+        
+        yPos += passengerHeight + 3;
+      });
+
+      // Footer pe fiecare pagină
+      const pageCount = doc.internal.pages.length - 1;
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        
+        // Text footer centrat
+        const footerText = 'Acest bilet este valabil doar pentru data si trenul specificat. Prezinta biletul la control.';
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const textWidth = doc.getTextWidth(footerText);
+        const xPos = (pageWidth - textWidth) / 2;
+        
+        doc.text(footerText, xPos, 285, { align: 'left' });
+        doc.text(`Pagina ${i} din ${pageCount}`, 105, 290, { align: 'center' });
+      }
+
+      // Descarcă PDF-ul
+      const fileName = `Bilet_${booking.bookingNumber || booking.id}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Eroare la generarea PDF-ului. Te rugam sa incerci din nou.');
+    }
   };
 
   return (
@@ -105,7 +358,7 @@ const TicketPage = () => {
             </div>
             <div className="ticket-number">
               <span className="number-label">Bilet #</span>
-              <span className="number-value">{booking.id}</span>
+              <span className="number-value">{booking.bookingNumber || booking.id}</span>
             </div>
           </div>
 
@@ -158,8 +411,20 @@ const TicketPage = () => {
 
             <div className="ticket-qr-section">
               <div className="qr-code-wrapper">
-                <QRCode value={qrData} />
-                <div className="qr-code-label">Cod bilet: {ticketCode}</div>
+                <img 
+                  src={qrCodeUrl} 
+                  alt="QR Code" 
+                  className="qr-code-image"
+                  onError={(e) => {
+                    // Fallback dacă imaginea nu se încarcă
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                />
+                <div className="qr-code-fallback" style={{ display: 'none' }}>
+                  <QRCode value={qrData} />
+                </div>
+                <div className="qr-code-label">Cod bilet: {booking.bookingNumber || ticketCode}</div>
               </div>
             </div>
           </div>
@@ -174,8 +439,16 @@ const TicketPage = () => {
                     <div className="passenger-name">
                       {passenger.firstName} {passenger.lastName}
                     </div>
-                    {passenger.idNumber && (
-                      <div className="passenger-id">CI: {passenger.idNumber}</div>
+                    {passenger.email && (
+                      <div className="passenger-email">{passenger.email}</div>
+                    )}
+                    {passenger.phone && (
+                      <div className="passenger-phone">{passenger.phone}</div>
+                    )}
+                    {passenger.wagonNumber && passenger.seatNumber && (
+                      <div className="passenger-seat">
+                        Vagon {passenger.wagonNumber}, Loc {passenger.seatNumber}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -189,7 +462,7 @@ const TicketPage = () => {
             </div>
             <div className="ticket-info">
               <p>Pentru întrebări, contactează serviciul clienți RailMate.</p>
-              <p>Bilet generat: {new Date().toLocaleString('ro-RO')}</p>
+              <p>Bilet generat: {new Date(booking.bookingDate).toLocaleString('ro-RO')}</p>
             </div>
           </div>
         </div>
@@ -199,4 +472,3 @@ const TicketPage = () => {
 };
 
 export default TicketPage;
-

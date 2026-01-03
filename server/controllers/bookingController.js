@@ -31,11 +31,26 @@ exports.createBooking = async (req, res) => {
     const totalPrice = train.price * passengers.length;
 
     // Creează snapshot-ul trenului
+    // Asigură-te că from și to sunt populate sau obține numele din Station
+    const Station = require('../models/Station');
+    let fromName = train.from.name || train.from;
+    let toName = train.to.name || train.to;
+    
+    // Dacă from/to sunt ObjectId-uri, populează-le
+    if (typeof train.from === 'object' && train.from._id && !train.from.name) {
+      const fromStation = await Station.findById(train.from._id || train.from);
+      fromName = fromStation ? fromStation.name : 'N/A';
+    }
+    if (typeof train.to === 'object' && train.to._id && !train.to.name) {
+      const toStation = await Station.findById(train.to._id || train.to);
+      toName = toStation ? toStation.name : 'N/A';
+    }
+    
     const trainSnapshot = {
       trainNumber: train.trainNumber,
       type: train.type,
-      from: train.from.name,
-      to: train.to.name,
+      from: fromName,
+      to: toName,
       departureTime: train.departureTime,
       arrivalTime: train.arrivalTime,
       price: train.price
@@ -85,28 +100,97 @@ exports.createBooking = async (req, res) => {
 exports.getUserBookings = async (req, res) => {
   try {
     const userId = req.user._id;
+    console.log('getUserBookings - userId:', userId);
+    console.log('getUserBookings - user email:', req.user.email);
     
     const bookings = await Booking.find({ userId })
-      .populate('train')
+      .populate({
+        path: 'train',
+        populate: {
+          path: 'from to',
+          select: 'name'
+        }
+      })
       .sort({ bookingDate: -1 });
 
-    const formattedBookings = bookings.map(booking => ({
-      id: booking._id,
-      bookingNumber: booking.bookingNumber,
-      train: {
-        trainNumber: booking.trainSnapshot.trainNumber,
-        type: booking.trainSnapshot.type,
-        from: booking.trainSnapshot.from,
-        to: booking.trainSnapshot.to,
-        departureTime: booking.trainSnapshot.departureTime,
-        arrivalTime: booking.trainSnapshot.arrivalTime
-      },
-      passengers: booking.passengers,
-      totalPrice: booking.totalPrice,
-      status: booking.status,
-      bookingDate: booking.bookingDate,
-      qrCode: booking.qrCode
-    }));
+    console.log('getUserBookings - found bookings:', bookings.length);
+    
+    // Log primul booking pentru debugging
+    if (bookings.length > 0) {
+      const firstBooking = bookings[0];
+      console.log('First booking structure:', {
+        hasTrainSnapshot: !!firstBooking.trainSnapshot,
+        trainSnapshotType: typeof firstBooking.trainSnapshot,
+        hasTrain: !!firstBooking.train,
+        trainType: typeof firstBooking.train,
+        trainIsObject: firstBooking.train && typeof firstBooking.train === 'object'
+      });
+    }
+
+    const formattedBookings = bookings.map(booking => {
+      // Folosește trainSnapshot dacă există și are date valide, altfel folosește datele din train populate
+      let trainData;
+      
+      // Verifică dacă trainSnapshot are nume valide (nu "N/A" sau undefined)
+      const hasValidSnapshot = booking.trainSnapshot && 
+                               booking.trainSnapshot.trainNumber &&
+                               booking.trainSnapshot.from &&
+                               booking.trainSnapshot.from !== 'N/A' &&
+                               booking.trainSnapshot.to &&
+                               booking.trainSnapshot.to !== 'N/A';
+      
+      if (hasValidSnapshot) {
+        // Folosește snapshot-ul salvat
+        trainData = {
+          trainNumber: booking.trainSnapshot.trainNumber,
+          type: booking.trainSnapshot.type,
+          from: booking.trainSnapshot.from,
+          to: booking.trainSnapshot.to,
+          departureTime: booking.trainSnapshot.departureTime,
+          arrivalTime: booking.trainSnapshot.arrivalTime
+        };
+      } else if (booking.train && typeof booking.train === 'object' && booking.train.trainNumber) {
+        // Folosește datele din tren populate
+        const train = booking.train;
+        const fromName = train.from?.name || 
+                        (typeof train.from === 'string' ? train.from : null) ||
+                        (train.from?._id ? 'Loading...' : 'N/A');
+        const toName = train.to?.name || 
+                      (typeof train.to === 'string' ? train.to : null) ||
+                      (train.to?._id ? 'Loading...' : 'N/A');
+        
+        trainData = {
+          trainNumber: train.trainNumber,
+          type: train.type,
+          from: fromName,
+          to: toName,
+          departureTime: train.departureTime,
+          arrivalTime: train.arrivalTime
+        };
+      } else {
+        // Fallback - date incomplete
+        console.warn('Booking without trainSnapshot or train data:', booking._id);
+        trainData = {
+          trainNumber: booking.trainSnapshot?.trainNumber || 'N/A',
+          type: booking.trainSnapshot?.type || 'N/A',
+          from: booking.trainSnapshot?.from || 'N/A',
+          to: booking.trainSnapshot?.to || 'N/A',
+          departureTime: booking.trainSnapshot?.departureTime || booking.bookingDate,
+          arrivalTime: booking.trainSnapshot?.arrivalTime || booking.bookingDate
+        };
+      }
+
+      return {
+        id: booking._id,
+        bookingNumber: booking.bookingNumber,
+        train: trainData,
+        passengers: booking.passengers || [],
+        totalPrice: booking.totalPrice,
+        status: booking.status,
+        bookingDate: booking.bookingDate,
+        qrCode: booking.qrCode
+      };
+    });
 
     res.json({
       success: true,
@@ -125,7 +209,13 @@ exports.getUserBookings = async (req, res) => {
 exports.getBookingById = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id)
-      .populate('train')
+      .populate({
+        path: 'train',
+        populate: {
+          path: 'from to',
+          select: 'name'
+        }
+      })
       .populate('userId', 'firstName lastName email');
 
     if (!booking) {
@@ -143,24 +233,78 @@ exports.getBookingById = async (req, res) => {
       });
     }
 
-    const formattedBooking = {
-      id: booking._id,
-      bookingNumber: booking.bookingNumber,
-      train: {
+    // Folosește trainSnapshot dacă există și are date valide, altfel folosește datele din train populate
+    let trainData;
+    
+    // Verifică dacă trainSnapshot are nume valide (nu "N/A" sau undefined)
+    const hasValidSnapshot = booking.trainSnapshot && 
+                             booking.trainSnapshot.trainNumber &&
+                             booking.trainSnapshot.from &&
+                             booking.trainSnapshot.from !== 'N/A' &&
+                             booking.trainSnapshot.to &&
+                             booking.trainSnapshot.to !== 'N/A';
+    
+    if (hasValidSnapshot) {
+      // Folosește snapshot-ul salvat
+      trainData = {
         trainNumber: booking.trainSnapshot.trainNumber,
         type: booking.trainSnapshot.type,
         from: booking.trainSnapshot.from,
         to: booking.trainSnapshot.to,
         departureTime: booking.trainSnapshot.departureTime,
         arrivalTime: booking.trainSnapshot.arrivalTime
-      },
+      };
+    } else if (booking.train && typeof booking.train === 'object' && booking.train.trainNumber) {
+      // Folosește datele din tren populate
+      const train = booking.train;
+      const fromName = train.from?.name || 
+                      (typeof train.from === 'string' ? train.from : null) ||
+                      (train.from?._id ? 'Loading...' : 'N/A');
+      const toName = train.to?.name || 
+                    (typeof train.to === 'string' ? train.to : null) ||
+                    (train.to?._id ? 'Loading...' : 'N/A');
+      
+      trainData = {
+        trainNumber: train.trainNumber,
+        type: train.type,
+        from: fromName,
+        to: toName,
+        departureTime: train.departureTime,
+        arrivalTime: train.arrivalTime
+      };
+    } else {
+      // Fallback - date incomplete
+      console.warn('Booking without trainSnapshot or train data:', booking._id);
+      trainData = {
+        trainNumber: booking.trainSnapshot?.trainNumber || 'N/A',
+        type: booking.trainSnapshot?.type || 'N/A',
+        from: booking.trainSnapshot?.from || 'N/A',
+        to: booking.trainSnapshot?.to || 'N/A',
+        departureTime: booking.trainSnapshot?.departureTime || booking.bookingDate,
+        arrivalTime: booking.trainSnapshot?.arrivalTime || booking.bookingDate
+      };
+    }
+
+    // Generează QR code dacă nu există
+    let qrCode = booking.qrCode;
+    if (!qrCode) {
+      qrCode = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(booking.bookingNumber || booking._id.toString())}`;
+      // Salvează QR code-ul generat în baza de date
+      booking.qrCode = qrCode;
+      await booking.save();
+    }
+
+    const formattedBooking = {
+      id: booking._id,
+      bookingNumber: booking.bookingNumber,
+      train: trainData,
       passengers: booking.passengers,
       totalPrice: booking.totalPrice,
       status: booking.status,
       paymentMethod: booking.paymentMethod,
       paymentStatus: booking.paymentStatus,
       bookingDate: booking.bookingDate,
-      qrCode: booking.qrCode
+      qrCode: qrCode
     };
 
     res.json({

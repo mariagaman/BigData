@@ -24,6 +24,7 @@ const auth = async (req, res, next) => {
     }
 
     req.user = user;
+    console.log('Auth middleware - user authenticated:', user.email, 'userId:', user._id);
     next();
   } catch (error) {
     res.status(401).json({ 

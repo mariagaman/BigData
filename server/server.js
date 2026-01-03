@@ -51,6 +51,125 @@ app.get('/api/debug/users', async (req, res) => {
   }
 });
 
+// Endpoint temporar pentru debugging - listează rezervările unui utilizator (după userId sau email)
+app.get('/api/debug/bookings/user/:identifier', async (req, res) => {
+  try {
+    const Booking = require('./models/Booking');
+    const User = require('./models/User');
+    const { identifier } = req.params;
+    
+    // Verifică dacă identifier-ul este un email sau un ObjectId
+    let user;
+    if (identifier.includes('@')) {
+      // Este un email
+      user = await User.findOne({ email: identifier.toLowerCase() });
+    } else {
+      // Este un ObjectId
+      user = await User.findById(identifier);
+    }
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Utilizator negăsit' 
+      });
+    }
+    
+    const bookings = await Booking.find({ userId: user._id })
+      .populate('train', 'trainNumber type from to departureTime arrivalTime price')
+      .populate('userId', 'email firstName lastName')
+      .sort({ bookingDate: -1 })
+      .select('-__v');
+    
+    res.json({ 
+      success: true, 
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      },
+      count: bookings.length,
+      bookings 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Endpoint temporar pentru debugging - listează toate rezervările
+app.get('/api/debug/bookings', async (req, res) => {
+  try {
+    const Booking = require('./models/Booking');
+    const bookings = await Booking.find()
+      .populate('train', 'trainNumber type from to')
+      .populate('userId', 'email firstName lastName')
+      .sort({ bookingDate: -1 })
+      .limit(50)
+      .select('-__v');
+    
+    res.json({ 
+      success: true, 
+      count: bookings.length,
+      bookings 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Endpoint temporar pentru debugging - verifică token-ul și userId-ul
+app.get('/api/debug/auth-check', async (req, res) => {
+  try {
+    const auth = require('./middleware/auth');
+    const jwt = require('jsonwebtoken');
+    
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.json({ 
+        success: false, 
+        message: 'No token provided',
+        hasToken: false
+      });
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-here-change-in-production');
+    const User = require('./models/User');
+    const user = await User.findById(decoded.userId).select('email firstName lastName _id');
+    
+    const Booking = require('./models/Booking');
+    const bookingsCount = await Booking.countDocuments({ userId: user._id });
+    
+    res.json({ 
+      success: true,
+      token: {
+        decoded: decoded,
+        userId: decoded.userId,
+        userIdType: typeof decoded.userId
+      },
+      user: {
+        _id: user._id,
+        _idString: user._id.toString(),
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      },
+      bookings: {
+        count: bookingsCount,
+        userId: user._id,
+        userIdString: user._id.toString()
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
 // Port
 const PORT = process.env.PORT || 5001;
 
