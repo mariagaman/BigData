@@ -105,7 +105,7 @@ const MyBookings = () => {
     return (
       <div className="my-bookings">
         <div className="empty-state">
-          <div className="empty-icon">🎫</div>
+          <div className="empty-icon">🎟️</div>
           <h2>Nu ai încă rezervări</h2>
           <p>Când vei rezerva bilete, acestea vor apărea aici.</p>
           <button className="btn-primary" onClick={() => navigate('/')}>
@@ -199,7 +199,7 @@ const MyBookings = () => {
 
                 <div className="booking-actions">
                   <Link to={`/ticket/${booking.id}`} className="btn-primary">
-                    🎫 Vezi bilet
+                    🎟️ Vezi bilet
                   </Link>
                   {isUpcoming(booking) && booking.status !== 'anulata' && (
                     <button 

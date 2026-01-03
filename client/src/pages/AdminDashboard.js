@@ -348,7 +348,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon">🎫</div>
+              <div className="stat-icon">🎟️</div>
               <div className="stat-info">
                 <h3>Total Rezervări</h3>
                 <p className="stat-value">{stats.overview.totalBookings}</p>

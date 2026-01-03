@@ -22,7 +22,7 @@ const Home = () => {
   }
   const features = [
     {
-      icon: '🎫',
+      icon: '🎟️',
       title: 'Rezervare rapidă',
       description: 'Rezervă biletele tale în doar câteva minute'
     },

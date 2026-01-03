@@ -266,7 +266,7 @@ const ProfilePage = () => {
             <h2>Acțiuni rapide</h2>
             <div className="quick-actions">
               <button className="action-card" onClick={() => navigate('/my-bookings')}>
-                <span className="action-icon">🎫</span>
+                <span className="action-icon">🎟️</span>
                 <span className="action-text">Biletele mele</span>
               </button>
               <button className="action-card" onClick={() => navigate('/')}>

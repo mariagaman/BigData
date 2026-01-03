@@ -178,7 +178,7 @@ const ConfirmationPage = () => {
           <ul>
             <li>✉️ Vei primi un email de confirmare cu biletele atașate</li>
             <li>📱 Poți accesa biletele oricând din secțiunea "Rezervările mele"</li>
-            <li>🎫 Prezintă biletul electronic sau versiunea printată la control</li>
+            <li>🎟️ Prezintă biletul electronic sau versiunea printată la control</li>
             <li>⏰ Te recomandăm să ajungi cu 15 minute înainte de plecare</li>
           </ul>
         </div>

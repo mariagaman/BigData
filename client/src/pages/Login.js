@@ -190,7 +190,7 @@ const Login = () => {
               </div>
             </div>
             <div className="benefit-item">
-              <span className="benefit-icon">🎫</span>
+              <span className="benefit-icon">🎟️</span>
               <div>
                 <h3>Gestionare ușoară</h3>
                 <p>Toate rezervările într-un singur loc</p>
