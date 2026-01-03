@@ -37,6 +37,18 @@ const TrainCard = ({ train }) => {
       navigate('/login', { state: { from: { pathname: `/booking/${train.id}` } } });
       return;
     }
+    // Salvează datele trenului (inclusiv pentru secțiuni intermediare) în sessionStorage
+    sessionStorage.setItem('selectedTrain', JSON.stringify({
+      id: train.id,
+      from: train.from,
+      to: train.to,
+      departureTime: train.departureTime,
+      arrivalTime: train.arrivalTime,
+      price: train.price,
+      trainNumber: train.trainNumber,
+      type: train.type,
+      availableSeats: train.availableSeats
+    }));
     navigate(`/booking/${train.id}`);
   };
 

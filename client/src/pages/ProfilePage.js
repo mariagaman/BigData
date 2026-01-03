@@ -48,9 +48,13 @@ const ProfilePage = () => {
       <div className="profile-container">
         <div className="profile-header">
           <div className="profile-avatar">
-            {user?.name?.charAt(0).toUpperCase() || 'U'}
+            {user?.firstName?.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase() || 'U'}
           </div>
-          <h1>Profilul meu</h1>
+          <h1>
+            {user?.firstName && user?.lastName 
+              ? `${user.firstName} ${user.lastName}`
+              : user?.name || 'Profilul meu'}
+          </h1>
         </div>
 
         <div className="profile-content">
@@ -133,10 +137,6 @@ const ProfilePage = () => {
                 <div className="info-item">
                   <span className="info-label">Telefon:</span>
                   <span className="info-value">{user?.phone || 'Nu este setat'}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Membru din:</span>
-                  <span className="info-value">{formatDate(user?.createdAt)}</span>
                 </div>
               </div>
             )}

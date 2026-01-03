@@ -7,6 +7,8 @@ exports.createPayment = async (req, res) => {
     const { bookingId, method, transactionId } = req.body;
     const userId = req.user._id;
 
+    console.log('Create payment - bookingId:', bookingId, 'type:', typeof bookingId);
+
     if (!bookingId || !method) {
       return res.status(400).json({
         success: false,
@@ -14,7 +16,50 @@ exports.createPayment = async (req, res) => {
       });
     }
 
-    const booking = await Booking.findById(bookingId);
+    // Convertește bookingId la string și verifică dacă este ObjectId valid
+    const mongoose = require('mongoose');
+    let bookingIdObj;
+    
+    try {
+      // Convertește la string
+      bookingIdObj = String(bookingId);
+      
+      // Verifică dacă este un ObjectId valid (24 caractere hex)
+      if (!mongoose.Types.ObjectId.isValid(bookingIdObj)) {
+        console.error('Invalid ObjectId:', bookingIdObj, 'type:', typeof bookingId);
+        console.error('BookingId length:', bookingIdObj.length, 'expected: 24');
+        
+        // Dacă este un număr (timestamp), înseamnă că nu este ObjectId valid
+        if (typeof bookingId === 'number' || !isNaN(Number(bookingId))) {
+          return res.status(400).json({
+            success: false,
+            message: 'ID-ul rezervării este invalid. Te rugăm să reîncerci procesul de rezervare.'
+          });
+        }
+        
+        return res.status(400).json({
+          success: false,
+          message: 'ID-ul rezervării este invalid'
+        });
+      }
+    } catch (error) {
+      console.error('Error validating bookingId:', error);
+      return res.status(400).json({
+        success: false,
+        message: 'ID-ul rezervării este invalid'
+      });
+    }
+
+    console.log('Looking for booking with ID:', bookingIdObj);
+    let booking = await Booking.findById(bookingIdObj);
+    
+    if (!booking) {
+      console.error('Booking not found with ID:', bookingIdObj);
+      return res.status(404).json({
+        success: false,
+        message: 'Rezervare negăsită'
+      });
+    }
 
     if (!booking) {
       return res.status(404).json({
@@ -47,14 +92,14 @@ exports.createPayment = async (req, res) => {
       amount: booking.totalPrice,
       method,
       transactionId: transactionId || `TXN-${Date.now()}`,
-      status: 'completed',
+      status: 'finalizat',
       paymentDate: new Date()
     });
 
     await payment.save();
 
     // Actualizează statusul rezervării
-    booking.paymentStatus = 'completed';
+    booking.paymentStatus = 'finalizat';
     await booking.save();
 
     res.status(201).json({

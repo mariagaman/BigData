@@ -23,6 +23,30 @@ const wagonSchema = new mongoose.Schema({
   seats: [seatSchema]
 }, { _id: false });
 
+const intermediateStationSchema = new mongoose.Schema({
+  station: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Station',
+    required: true
+  },
+  arrivalTime: {
+    type: Date,
+    required: true
+  },
+  departureTime: {
+    type: Date,
+    required: true
+  },
+  stopDuration: {
+    type: Number,
+    required: true
+  },
+  distanceFromStart: {
+    type: Number,
+    required: true
+  }
+}, { _id: false });
+
 const trainSchema = new mongoose.Schema({
   trainNumber: {
     type: String,
@@ -70,7 +94,10 @@ const trainSchema = new mongoose.Schema({
   amenities: [{
     type: String
   }],
-  wagons: [wagonSchema]
+  wagons: [wagonSchema],
+  route: {
+    intermediateStations: [intermediateStationSchema]
+  }
 }, {
   timestamps: true
 });

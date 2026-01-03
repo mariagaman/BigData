@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useBooking } from '../context/BookingContext';
 import { useAuth } from '../context/AuthContext';
 import { createBooking, createPayment } from '../services/api';
 import BookingSummary from '../components/BookingSummary';
@@ -8,7 +7,6 @@ import '../styles/PaymentPage.css';
 
 const PaymentPage = () => {
   const navigate = useNavigate();
-  const { selectedTrain, searchParams, createBooking } = useBooking();
   const { user } = useAuth();
   
   const [pendingBooking, setPendingBooking] = useState(null);
@@ -42,13 +40,14 @@ const PaymentPage = () => {
         console.error('Error parsing pending booking:', error);
         navigate('/search');
       }
-    } else if (!selectedTrain) {
+    } else {
       navigate('/search');
     }
-  }, [selectedTrain, navigate]);
+  }, [navigate]);
 
-  const train = selectedTrain || (pendingBooking?.train);
+  const train = pendingBooking?.train;
   const passengers = pendingBooking?.passengers || [];
+  const searchParams = pendingBooking?.searchParams || {};
 
   if (!train) {
     return (
@@ -203,13 +202,23 @@ const PaymentPage = () => {
           type: 'transfer'
         },
         paymentResult: paymentResult,
-        totalPrice: train.price * searchParams.passengers,
-        searchParams: searchParams
+        totalPrice: train.price * passengers.length
       };
 
       // Creează rezervarea în baza de date
+      // Folosește stațiile din searchParams (care sunt stațiile reale căutate)
+      // sau fallback la train.from/to dacă searchParams nu există
+      const actualFrom = searchParams.from || train.from;
+      const actualTo = searchParams.to || train.to;
+      
+      // Folosește prețul și orele din tren (care sunt deja calculate pentru secțiunea intermediară)
       const bookingResponse = await createBooking({
         trainId: train.id,
+        from: actualFrom, // Stația reală de plecare din căutare (poate fi intermediară)
+        to: actualTo, // Stația reală de sosire din căutare (poate fi intermediară)
+        departureTime: train.departureTime, // Ora reală de plecare (deja calculată pentru secțiune)
+        arrivalTime: train.arrivalTime, // Ora reală de sosire (deja calculată pentru secțiune)
+        price: train.price, // Prețul corect pentru secțiunea călătorită (deja calculat)
         passengers: passengers.map(p => ({
           firstName: p.firstName,
           lastName: p.lastName,
@@ -221,9 +230,17 @@ const PaymentPage = () => {
         paymentMethod: paymentMethod
       });
 
+      console.log('Booking response:', bookingResponse);
+      console.log('Booking ID:', bookingResponse.id, 'type:', typeof bookingResponse.id);
+
+      // Verifică dacă ID-ul este valid ObjectId (24 caractere hex)
+      if (!bookingResponse.id || typeof bookingResponse.id !== 'string' || bookingResponse.id.length !== 24) {
+        throw new Error('ID-ul rezervării este invalid. Te rugăm să reîncerci procesul de rezervare.');
+      }
+
       // Creează plata în baza de date
       await createPayment({
-        bookingId: bookingResponse.id,
+        bookingId: bookingResponse.id, // Este deja string ObjectId
         method: paymentMethod,
         transactionId: paymentResult.transactionId
       });
@@ -239,7 +256,7 @@ const PaymentPage = () => {
     }
   };
 
-  const totalPrice = train.price * searchParams.passengers;
+  const totalPrice = train ? train.price * passengers.length : 0;
 
   return (
     <div className="payment-page">
@@ -425,7 +442,7 @@ const PaymentPage = () => {
         <aside className="payment-sidebar">
           <BookingSummary
             train={train}
-            passengers={searchParams.passengers}
+            passengers={passengers.length}
             totalPrice={totalPrice}
           />
         </aside>

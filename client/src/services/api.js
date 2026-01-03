@@ -55,8 +55,13 @@ export const searchTrains = async (searchParams) => {
   }));
 };
 
-export const getTrainById = async (trainId) => {
-  const response = await apiRequest(`/trains/${trainId}`);
+export const getTrainById = async (trainId, from = null, to = null) => {
+  // Dacă există from și to, le trimite ca query params pentru calcularea corectă a prețului
+  let url = `/trains/${trainId}`;
+  if (from && to) {
+    url += `?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+  }
+  const response = await apiRequest(url);
   
   // Transformă datele pentru compatibilitate cu frontend
   return {

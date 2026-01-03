@@ -118,6 +118,47 @@ app.get('/api/debug/bookings', async (req, res) => {
   }
 });
 
+// Endpoint temporar pentru debugging - listează toate trenurile
+app.get('/api/debug/trains', async (req, res) => {
+  try {
+    const Train = require('./models/Train');
+    const trains = await Train.find()
+      .populate('from', 'name city')
+      .populate('to', 'name city')
+      .populate('route.intermediateStations.station', 'name city')
+      .limit(20)
+      .select('-wagons');
+    
+    res.json({ 
+      success: true, 
+      count: trains.length,
+      trains: trains.map(train => ({
+        id: train._id,
+        trainNumber: train.trainNumber,
+        type: train.type,
+        from: train.from?.name || train.from,
+        to: train.to?.name || train.to,
+        departureTime: train.departureTime,
+        arrivalTime: train.arrivalTime,
+        price: train.price,
+        hasIntermediateStations: train.route?.intermediateStations?.length > 0,
+        intermediateStationsCount: train.route?.intermediateStations?.length || 0,
+        intermediateStations: train.route?.intermediateStations?.map(s => ({
+          station: s.station?.name || s.station,
+          arrivalTime: s.arrivalTime,
+          departureTime: s.departureTime
+        })) || []
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
 // Endpoint temporar pentru debugging - verifică token-ul și userId-ul
 app.get('/api/debug/auth-check', async (req, res) => {
   try {

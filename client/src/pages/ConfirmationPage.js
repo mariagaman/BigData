@@ -1,21 +1,61 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useBooking } from '../context/BookingContext';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { getBookingById } from '../services/api';
 import SearchForm from '../components/SearchForm';
 import '../styles/ConfirmationPage.css';
 
 const ConfirmationPage = () => {
   const navigate = useNavigate();
-  const { bookingData } = useBooking();
+  const [searchParams] = useSearchParams();
+  const [bookingData, setBookingData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!bookingData) {
+    const bookingId = searchParams.get('bookingId');
+    
+    if (!bookingId) {
       navigate('/');
+      return;
     }
-  }, [bookingData, navigate]);
 
-  if (!bookingData) {
-    return null;
+    const fetchBooking = async () => {
+      try {
+        setLoading(true);
+        const booking = await getBookingById(bookingId);
+        setBookingData(booking);
+      } catch (err) {
+        console.error('Error fetching booking:', err);
+        setError('Nu s-a putut încărca rezervarea');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooking();
+  }, [searchParams, navigate]);
+
+  if (loading) {
+    return (
+      <div className="confirmation-page">
+        <div className="confirmation-container">
+          <div className="loading">Se încarcă...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !bookingData) {
+    return (
+      <div className="confirmation-page">
+        <div className="confirmation-container">
+          <div className="error">{error || 'Rezervarea nu a fost găsită'}</div>
+          <button className="btn-primary" onClick={() => navigate('/')}>
+            Înapoi acasă
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const formatTime = (time) => {
@@ -35,7 +75,9 @@ const ConfirmationPage = () => {
   };
 
   const handleDownloadTicket = () => {
-    alert('Funcționalitatea de descărcare va fi implementată în curând!');
+    if (bookingData?.id) {
+      navigate(`/ticket/${bookingData.id}`);
+    }
   };
 
   return (
@@ -55,7 +97,7 @@ const ConfirmationPage = () => {
         <div className="booking-details">
           <div className="booking-number">
             <span className="label">Număr rezervare:</span>
-            <span className="value">#{bookingData.id}</span>
+            <span className="value">#{bookingData.bookingNumber || bookingData.id}</span>
           </div>
 
           <div className="journey-details">
@@ -64,25 +106,25 @@ const ConfirmationPage = () => {
             <div className="detail-row">
               <span className="detail-label">Tren:</span>
               <span className="detail-value">
-                {bookingData.train.type} {bookingData.train.trainNumber}
+                {bookingData.train?.type || 'N/A'} {bookingData.train?.trainNumber || 'N/A'}
               </span>
             </div>
 
             <div className="route-display">
               <div className="route-station">
-                <div className="station-name">{bookingData.train.from}</div>
-                <div className="station-time">{formatTime(bookingData.train.departureTime)}</div>
+                <div className="station-name">{bookingData.train?.from || 'N/A'}</div>
+                <div className="station-time">{bookingData.train?.departureTime ? formatTime(bookingData.train.departureTime) : 'N/A'}</div>
               </div>
               <div className="route-arrow">→</div>
               <div className="route-station">
-                <div className="station-name">{bookingData.train.to}</div>
-                <div className="station-time">{formatTime(bookingData.train.arrivalTime)}</div>
+                <div className="station-name">{bookingData.train?.to || 'N/A'}</div>
+                <div className="station-time">{bookingData.train?.arrivalTime ? formatTime(bookingData.train.arrivalTime) : 'N/A'}</div>
               </div>
             </div>
 
             <div className="detail-row">
               <span className="detail-label">Data:</span>
-              <span className="detail-value">{formatDate(bookingData.train.departureTime)}</span>
+              <span className="detail-value">{bookingData.train?.departureTime ? formatDate(bookingData.train.departureTime) : 'N/A'}</span>
             </div>
 
             <div className="detail-row">
