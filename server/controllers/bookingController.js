@@ -622,28 +622,30 @@ exports.cancelBooking = async (req, res) => {
     }
 
     // Verifică dacă utilizatorul are dreptul să anuleze această rezervare
-    if (booking.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    if (booking.userId.toString() !== req.user._id.toString() && req.user.role !== 'administrator') {
       return res.status(403).json({
         success: false,
         message: 'Nu ai permisiunea să anulezi această rezervare'
       });
     }
 
-    if (booking.status === 'cancelled') {
+    if (booking.status === 'anulata') {
       return res.status(400).json({
         success: false,
         message: 'Rezervarea este deja anulată'
       });
     }
 
-    booking.status = 'cancelled';
+    booking.status = 'anulata';
+    booking.paymentStatus = 'rambursat';
     booking.cancellationDate = new Date();
     await booking.save();
 
     // Actualizează și plata dacă există
+    const Payment = require('../models/Payment');
     const payment = await Payment.findOne({ bookingId: booking._id });
-    if (payment && payment.status === 'completed') {
-      payment.status = 'refunded';
+    if (payment && payment.status === 'finalizat') {
+      payment.status = 'rambursat';
       payment.refundDate = new Date();
       payment.refundAmount = payment.amount;
       await payment.save();

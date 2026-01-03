@@ -61,14 +61,16 @@ const MyBookings = () => {
   });
 
   const handleCancelBooking = async (bookingId) => {
-    if (window.confirm('Ești sigur că vrei să anulezi această rezervare?')) {
+    if (window.confirm('Ești sigur că vrei să anulezi această rezervare? Suma va fi rambursată.')) {
       try {
         await cancelBookingAPI(bookingId);
-        // Actualizează lista de rezervări
-        setUserBookings(userBookings.filter(b => b.id !== bookingId));
+        // Reîncarcă lista de rezervări pentru a obține datele actualizate
+        const updatedBookings = await getUserBookings();
+        setUserBookings(updatedBookings);
+        alert('Rezervarea a fost anulată cu succes. Suma va fi rambursată.');
       } catch (error) {
         console.error('Error canceling booking:', error);
-        alert('Eroare la anularea rezervării. Te rugăm să încerci din nou.');
+        alert(error.message || 'Eroare la anularea rezervării. Te rugăm să încerci din nou.');
       }
     }
   };
@@ -152,8 +154,12 @@ const MyBookings = () => {
                   <div className="booking-number">
                     Rezervare #{booking.bookingNumber || booking.id}
                   </div>
-                  <div className={`booking-status ${isUpcoming(booking) ? 'upcoming' : 'past'}`}>
-                    {isUpcoming(booking) ? '✓ Activă' : '✓ Finalizată'}
+                  <div className={`booking-status ${
+                    booking.status === 'anulata' ? 'cancelled' : 
+                    isUpcoming(booking) ? 'upcoming' : 'past'
+                  }`}>
+                    {booking.status === 'anulata' ? '✗ Anulată' : 
+                     isUpcoming(booking) ? '✓ Activă' : '✓ Finalizată'}
                   </div>
                 </div>
 
@@ -195,7 +201,7 @@ const MyBookings = () => {
                   <Link to={`/ticket/${booking.id}`} className="btn-primary">
                     🎫 Vezi bilet
                   </Link>
-                  {isUpcoming(booking) && booking.status !== 'cancelled' && (
+                  {isUpcoming(booking) && booking.status !== 'anulata' && (
                     <button 
                       className="btn-danger"
                       onClick={() => handleCancelBooking(booking.id)}

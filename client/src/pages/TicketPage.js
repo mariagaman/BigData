@@ -159,7 +159,7 @@ const TicketPage = () => {
       doc.setFont('helvetica', 'normal');
       doc.text(`Bilet #${booking.bookingNumber || booking.id}`, 150, 20);
       const statusText = booking.status === 'confirmed' ? 'Confirmat' : 
-                        booking.status === 'cancelled' ? 'Anulat' : booking.status;
+                        booking.status === 'anulata' ? 'Anulat' : booking.status === 'confirmata' ? 'Confirmată' : booking.status;
       doc.text(`Status: ${removeDiacritics(statusText)}`, 150, 28);
 
       // Resetare culoare text
