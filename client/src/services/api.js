@@ -1,150 +1,123 @@
-// Mock API service - va fi înlocuit cu apeluri reale către backend
+import API_BASE_URL from '../config/api';
 
-const mockTrains = [
-  {
-    id: 1,
-    trainNumber: 'IR 1621',
-    type: 'InterRegio',
-    from: 'București Nord',
-    to: 'Brașov',
-    departureTime: new Date('2025-10-15T08:00:00'),
-    arrivalTime: new Date('2025-10-15T10:45:00'),
-    price: 45,
-    availableSeats: 120,
-    stops: 3,
-    amenities: ['wifi', 'ac', 'power']
-  },
-  {
-    id: 2,
-    trainNumber: 'IC 581',
-    type: 'InterCity',
-    from: 'București Nord',
-    to: 'Brașov',
-    departureTime: new Date('2025-10-15T10:30:00'),
-    arrivalTime: new Date('2025-10-15T13:00:00'),
-    price: 65,
-    availableSeats: 80,
-    stops: 1,
-    amenities: ['wifi', 'ac', 'food', 'power']
-  },
-  {
-    id: 3,
-    trainNumber: 'R 3045',
-    type: 'Regio',
-    from: 'București Nord',
-    to: 'Brașov',
-    departureTime: new Date('2025-10-15T14:15:00'),
-    arrivalTime: new Date('2025-10-15T18:30:00'),
-    price: 35,
-    availableSeats: 150,
-    stops: 8,
-    amenities: ['ac']
-  },
-  {
-    id: 4,
-    trainNumber: 'IC 521',
-    type: 'InterCity',
-    from: 'Cluj-Napoca',
-    to: 'Timișoara Nord',
-    departureTime: new Date('2025-10-15T07:00:00'),
-    arrivalTime: new Date('2025-10-15T10:30:00'),
-    price: 60,
-    availableSeats: 90,
-    stops: 2,
-    amenities: ['wifi', 'ac', 'food', 'power']
-  },
-  {
-    id: 5,
-    trainNumber: 'IR 1825',
-    type: 'InterRegio',
-    from: 'București Nord',
-    to: 'Constanța',
-    departureTime: new Date('2025-10-15T09:00:00'),
-    arrivalTime: new Date('2025-10-15T11:30:00'),
-    price: 55,
-    availableSeats: 100,
-    stops: 4,
-    amenities: ['wifi', 'ac', 'power']
-  },
-  {
-    id: 6,
-    trainNumber: 'IC 585',
-    type: 'InterCity',
-    from: 'Iași',
-    to: 'București Nord',
-    departureTime: new Date('2025-10-15T06:30:00'),
-    arrivalTime: new Date('2025-10-15T13:00:00'),
-    price: 75,
-    availableSeats: 85,
-    stops: 3,
-    amenities: ['wifi', 'ac', 'food', 'power']
-  }
-];
-
-// Simulează întârziere de rețea
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-export const searchTrains = async (searchParams) => {
-  await delay(1000);
+// Helper function pentru request-uri
+const apiRequest = async (endpoint, options = {}) => {
+  const token = localStorage.getItem('token');
   
-  // Filtrează trenurile în funcție de parametrii de căutare
-  const results = mockTrains.filter(train => {
-    const matchesRoute = train.from === searchParams.from && train.to === searchParams.to;
-    
-    // Pentru demonstrație, setăm data din searchParams la trenuri
-    if (matchesRoute && searchParams.date) {
-      const searchDate = new Date(searchParams.date);
-      train.departureTime = new Date(searchDate);
-      train.departureTime.setHours(train.departureTime.getHours() + train.id);
-      
-      train.arrivalTime = new Date(train.departureTime);
-      const duration = mockTrains.find(t => t.id === train.id).arrivalTime - 
-                      mockTrains.find(t => t.id === train.id).departureTime;
-      train.arrivalTime.setTime(train.arrivalTime.getTime() + duration);
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+    ...options
+  };
+
+  if (options.body && typeof options.body === 'object') {
+    config.body = JSON.stringify(options.body);
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Eroare la request');
     }
-    
-    return matchesRoute;
+
+    return data;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+};
+
+// Stations API
+export const getAllStations = async () => {
+  const response = await apiRequest('/stations');
+  return response.stations;
+};
+
+// Trains API
+export const searchTrains = async (searchParams) => {
+  const queryParams = new URLSearchParams({
+    from: searchParams.from,
+    to: searchParams.to,
+    ...(searchParams.date && { date: searchParams.date })
   });
 
-  return results;
+  const response = await apiRequest(`/trains/search?${queryParams}`);
+  
+  // Transformă datele pentru compatibilitate cu frontend
+  return response.trains.map(train => ({
+    ...train,
+    departureTime: new Date(train.departureTime),
+    arrivalTime: new Date(train.arrivalTime)
+  }));
 };
 
 export const getTrainById = async (trainId) => {
-  await delay(500);
+  const response = await apiRequest(`/trains/${trainId}`);
   
-  const train = mockTrains.find(t => t.id === parseInt(trainId));
-  
-  if (!train) {
-    throw new Error('Train not found');
-  }
-  
-  return { ...train };
-};
-
-export const createBooking = async (bookingData) => {
-  await delay(1000);
-  
-  // Simulează crearea unei rezervări
+  // Transformă datele pentru compatibilitate cu frontend
   return {
-    success: true,
-    bookingId: Date.now(),
-    message: 'Rezervare creată cu succes'
+    ...response.train,
+    departureTime: new Date(response.train.departureTime),
+    arrivalTime: new Date(response.train.arrivalTime)
   };
 };
 
-export const getUserBookings = async (userId) => {
-  await delay(800);
-  
-  // Returnează rezervările utilizatorului
-  return [];
+// Bookings API
+export const createBooking = async (bookingData) => {
+  const response = await apiRequest('/bookings', {
+    method: 'POST',
+    body: bookingData
+  });
+  return response.booking;
+};
+
+export const getUserBookings = async () => {
+  const response = await apiRequest('/bookings/user');
+  return response.bookings.map(booking => ({
+    ...booking,
+    train: {
+      ...booking.train,
+      departureTime: new Date(booking.train.departureTime),
+      arrivalTime: new Date(booking.train.arrivalTime)
+    },
+    bookingDate: new Date(booking.bookingDate)
+  }));
+};
+
+export const getBookingById = async (bookingId) => {
+  const response = await apiRequest(`/bookings/${bookingId}`);
+  return {
+    ...response.booking,
+    train: {
+      ...response.booking.train,
+      departureTime: new Date(response.booking.train.departureTime),
+      arrivalTime: new Date(response.booking.train.arrivalTime)
+    },
+    bookingDate: new Date(response.booking.bookingDate)
+  };
 };
 
 export const cancelBooking = async (bookingId) => {
-  await delay(500);
-  
-  return {
-    success: true,
-    message: 'Rezervare anulată cu succes'
-  };
+  const response = await apiRequest(`/bookings/${bookingId}/cancel`, {
+    method: 'PUT'
+  });
+  return response;
 };
 
+// Payments API
+export const createPayment = async (paymentData) => {
+  const response = await apiRequest('/payments', {
+    method: 'POST',
+    body: paymentData
+  });
+  return response.payment;
+};
+
+export const getPaymentByBookingId = async (bookingId) => {
+  const response = await apiRequest(`/payments/booking/${bookingId}`);
+  return response.payment;
+};

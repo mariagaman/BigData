@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
+import { getAllStations } from '../services/api';
 import DatePicker from './DatePicker';
 import '../styles/SearchForm.css';
 
@@ -16,6 +17,42 @@ const SearchForm = ({ inline = false }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [stations, setStations] = useState([]);
+  const [loadingStations, setLoadingStations] = useState(true);
+
+  // Preia stațiile din API
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const stationsData = await getAllStations();
+        setStations(stationsData);
+      } catch (error) {
+        console.error('Error fetching stations:', error);
+        // Fallback la lista hardcodată în caz de eroare
+        setStations([
+          { name: 'București Nord' },
+          { name: 'Cluj-Napoca' },
+          { name: 'Timișoara Nord' },
+          { name: 'Iași' },
+          { name: 'Constanța' },
+          { name: 'Brașov' },
+          { name: 'Craiova' },
+          { name: 'Galați' },
+          { name: 'Ploiești Sud' },
+          { name: 'Oradea' },
+          { name: 'Sibiu' },
+          { name: 'Arad' },
+          { name: 'Pitești' },
+          { name: 'Bacău' },
+          { name: 'Suceava' }
+        ]);
+      } finally {
+        setLoadingStations(false);
+      }
+    };
+
+    fetchStations();
+  }, []);
 
   // Actualizăm formData când searchParams se schimbă
   useEffect(() => {
@@ -28,24 +65,6 @@ const SearchForm = ({ inline = false }) => {
       });
     }
   }, [searchParams]);
-
-  const cities = [
-    'București Nord',
-    'Cluj-Napoca',
-    'Timișoara Nord',
-    'Iași',
-    'Constanța',
-    'Brașov',
-    'Craiova',
-    'Galați',
-    'Ploiești Sud',
-    'Oradea',
-    'Sibiu',
-    'Arad',
-    'Pitești',
-    'Bacău',
-    'Suceava'
-  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -114,8 +133,8 @@ const SearchForm = ({ inline = false }) => {
               className={errors.from ? 'error' : ''}
             >
               <option value="">Selectează orașul</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
+              {stations.map(station => (
+                <option key={station._id || station.name} value={station.name}>{station.name}</option>
               ))}
             </select>
 
@@ -136,8 +155,8 @@ const SearchForm = ({ inline = false }) => {
               className={errors.to ? 'error' : ''}
             >
               <option value="">Selectează orașul</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
+              {stations.map(station => (
+                <option key={station._id || station.name} value={station.name}>{station.name}</option>
               ))}
             </select>
           </div>

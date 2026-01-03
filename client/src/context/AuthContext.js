@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import * as authService from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -16,82 +17,64 @@ export const AuthProvider = ({ children }) => {
 
   // Verifică dacă utilizatorul este autentificat la încărcarea aplicației
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-        localStorage.removeItem('user');
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const userData = await authService.getCurrentUser();
+          setUser(userData);
+        } catch (error) {
+          console.error('Error getting current user:', error);
+          // Token invalid, șterge-l
+          localStorage.removeItem('token');
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email, password) => {
-    // Simulează autentificare - în realitate, aici ar fi un API call
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Mock validation
-        if (email && password.length >= 6) {
-          const userData = {
-            id: Date.now(),
-            email: email,
-            name: email.split('@')[0],
-            createdAt: new Date().toISOString()
-          };
-          
-          setUser(userData);
-          localStorage.setItem('user', JSON.stringify(userData));
-          resolve({ success: true, user: userData });
-        } else {
-          reject({ 
-            success: false, 
-            message: 'Email sau parolă incorectă' 
-          });
-        }
-      }, 1000);
-    });
+    try {
+      const response = await authService.login(email, password);
+      setUser(response.user);
+      return { success: true, user: response.user };
+    } catch (error) {
+      throw {
+        success: false,
+        message: error.message || 'Email sau parolă incorectă'
+      };
+    }
   };
 
   const register = async (userData) => {
-    // Simulează înregistrare - în realitate, aici ar fi un API call
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const { email, password, firstName, lastName } = userData;
-        
-        if (email && password.length >= 6 && firstName && lastName) {
-          const newUser = {
-            id: Date.now(),
-            email: email,
-            name: `${firstName} ${lastName}`,
-            firstName,
-            lastName,
-            createdAt: new Date().toISOString()
-          };
-          
-          setUser(newUser);
-          localStorage.setItem('user', JSON.stringify(newUser));
-          resolve({ success: true, user: newUser });
-        } else {
-          reject({ 
-            success: false, 
-            message: 'Te rugăm să completezi toate câmpurile corect' 
-          });
-        }
-      }, 1000);
-    });
+    try {
+      const response = await authService.register(userData);
+      setUser(response.user);
+      return { success: true, user: response.user };
+    } catch (error) {
+      throw {
+        success: false,
+        message: error.message || 'Te rugăm să completezi toate câmpurile corect'
+      };
+    }
   };
 
   const logout = () => {
+    authService.logout();
     setUser(null);
-    localStorage.removeItem('user');
   };
 
-  const updateUser = (updatedData) => {
-    const updatedUser = { ...user, ...updatedData };
-    setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+  const updateUser = async (updatedData) => {
+    try {
+      const updatedUser = await authService.updateUser(updatedData);
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
   };
 
   const value = {
@@ -110,4 +93,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-

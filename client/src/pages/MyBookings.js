@@ -1,12 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useBooking } from '../context/BookingContext';
+import { useAuth } from '../context/AuthContext';
+import { getUserBookings, cancelBooking as cancelBookingAPI } from '../services/api';
 import '../styles/MyBookings.css';
 
 const MyBookings = () => {
   const navigate = useNavigate();
-  const { userBookings, cancelBooking } = useBooking();
+  const { isAuthenticated } = useAuth();
+  const [userBookings, setUserBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (!isAuthenticated) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const bookings = await getUserBookings();
+        setUserBookings(bookings);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, [isAuthenticated]);
 
   const formatTime = (time) => {
     return new Date(time).toLocaleTimeString('ro-RO', { 
@@ -37,11 +60,44 @@ const MyBookings = () => {
     return true;
   });
 
-  const handleCancelBooking = (bookingId) => {
+  const handleCancelBooking = async (bookingId) => {
     if (window.confirm('Ești sigur că vrei să anulezi această rezervare?')) {
-      cancelBooking(bookingId);
+      try {
+        await cancelBookingAPI(bookingId);
+        // Actualizează lista de rezervări
+        setUserBookings(userBookings.filter(b => b.id !== bookingId));
+      } catch (error) {
+        console.error('Error canceling booking:', error);
+        alert('Eroare la anularea rezervării. Te rugăm să încerci din nou.');
+      }
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="my-bookings">
+        <div className="empty-state">
+          <div className="empty-icon">🔒</div>
+          <h2>Trebuie să te conectezi</h2>
+          <p>Pentru a vedea rezervările tale, te rugăm să te conectezi.</p>
+          <button className="btn-primary" onClick={() => navigate('/login')}>
+            Conectează-te
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="my-bookings">
+        <div className="loading">
+          <div className="spinner"></div>
+          <p>Încărcăm rezervările...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (userBookings.length === 0) {
     return (
@@ -94,7 +150,7 @@ const MyBookings = () => {
               <div key={booking.id} className={`booking-card ${isPast(booking) ? 'past' : ''}`}>
                 <div className="booking-header">
                   <div className="booking-number">
-                    Rezervare #{booking.id}
+                    Rezervare #{booking.bookingNumber || booking.id}
                   </div>
                   <div className={`booking-status ${isUpcoming(booking) ? 'upcoming' : 'past'}`}>
                     {isUpcoming(booking) ? '✓ Activă' : '✓ Finalizată'}
@@ -139,7 +195,7 @@ const MyBookings = () => {
                   <Link to={`/ticket/${booking.id}`} className="btn-primary">
                     🎫 Vezi bilet
                   </Link>
-                  {isUpcoming(booking) && (
+                  {isUpcoming(booking) && booking.status !== 'cancelled' && (
                     <button 
                       className="btn-danger"
                       onClick={() => handleCancelBooking(booking.id)}
@@ -158,4 +214,3 @@ const MyBookings = () => {
 };
 
 export default MyBookings;
-

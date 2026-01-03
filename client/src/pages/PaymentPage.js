@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import { useAuth } from '../context/AuthContext';
+import { createBooking, createPayment } from '../services/api';
 import BookingSummary from '../components/BookingSummary';
 import '../styles/PaymentPage.css';
 
@@ -206,19 +207,32 @@ const PaymentPage = () => {
         searchParams: searchParams
       };
 
-      // Aici ar trebui să fie un API call pentru salvare în MongoDB
-      // Exemplu: await fetch('/api/bookings', { method: 'POST', body: JSON.stringify(bookingData) });
-      // Pentru moment, simulăm salvarea
-      console.log('Salvare în baza de date:', bookingData);
-      
-      // Salvare în context (temporar, până când backend-ul e gata)
-      createBooking(bookingData);
+      // Creează rezervarea în baza de date
+      const bookingResponse = await createBooking({
+        trainId: train.id,
+        passengers: passengers.map(p => ({
+          firstName: p.firstName,
+          lastName: p.lastName,
+          email: p.email,
+          phone: p.phone,
+          wagonNumber: p.wagonNumber || 1,
+          seatNumber: p.seatNumber || '1A'
+        })),
+        paymentMethod: paymentMethod
+      });
+
+      // Creează plata în baza de date
+      await createPayment({
+        bookingId: bookingResponse.id,
+        method: paymentMethod,
+        transactionId: paymentResult.transactionId
+      });
       
       // Șterge datele temporare
       sessionStorage.removeItem('pendingBooking');
       
-      // Navigare la confirmare
-      navigate('/confirmation');
+      // Navigare la confirmare cu ID-ul rezervării
+      navigate(`/confirmation?bookingId=${bookingResponse.id}`);
     } catch (error) {
       setError(error.message || 'Plata a eșuat. Te rugăm să încerci din nou.');
       setLoading(false);
