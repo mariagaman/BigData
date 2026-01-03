@@ -192,3 +192,65 @@ exports.updateUser = async (req, res) => {
   }
 };
 
+// Change password
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Te rugăm să completezi toate câmpurile'
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Parola nouă trebuie să aibă minim 6 caractere'
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Parola nouă și confirmarea parolei nu se potrivesc'
+      });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Parola nouă trebuie să fie diferită de parola curentă'
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    // Verifică parola curentă
+    const isMatch = await user.comparePassword(currentPassword);
+    
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Parola curentă este incorectă'
+      });
+    }
+
+    // Actualizează parola
+    user.password = newPassword; // Va fi hash-uită automat de pre('save')
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Parola a fost schimbată cu succes'
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Eroare la schimbarea parolei'
+    });
+  }
+};
+

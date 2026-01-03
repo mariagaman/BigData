@@ -5,14 +5,22 @@ import '../styles/ProfilePage.css';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user, updateUser, logout } = useAuth();
+  const { user, updateUser, changePassword, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user?.firstName || user?.name?.split(' ')[0] || '',
     lastName: user?.lastName || user?.name?.split(' ')[1] || '',
     email: user?.email || '',
     phone: user?.phone || ''
   });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,13 +42,63 @@ const ProfilePage = () => {
     setIsEditing(false);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('ro-RO', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData({ ...passwordData, [name]: value });
+    setPasswordError('');
+    setPasswordSuccess('');
+  };
+
+  const handlePasswordSubmit = async () => {
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      setPasswordError('Te rugăm să completezi toate câmpurile');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError('Parola nouă trebuie să aibă minim 6 caractere');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('Parola nouă și confirmarea parolei nu se potrivesc');
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      setPasswordError('Parola nouă trebuie să fie diferită de parola curentă');
+      return;
+    }
+
+    try {
+      await changePassword(passwordData);
+      setPasswordSuccess('Parola a fost schimbată cu succes!');
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setTimeout(() => {
+        setIsChangingPassword(false);
+        setPasswordSuccess('');
+      }, 2000);
+    } catch (error) {
+      setPasswordError(error.message || 'Eroare la schimbarea parolei');
+    }
+  };
+
+  const handlePasswordCancel = () => {
+    setIsChangingPassword(false);
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
     });
+    setPasswordError('');
+    setPasswordSuccess('');
   };
 
   return (
@@ -139,6 +197,68 @@ const ProfilePage = () => {
                   <span className="info-value">{user?.phone || 'Nu este setat'}</span>
                 </div>
               </div>
+            )}
+          </div>
+
+          <div className="profile-section">
+            <div className="section-header">
+              <h2>Schimbare parolă</h2>
+              {!isChangingPassword && (
+                <button className="btn-outline" onClick={() => setIsChangingPassword(true)}>
+                  🔒 Schimbă parola
+                </button>
+              )}
+            </div>
+
+            {isChangingPassword ? (
+              <div className="profile-form">
+                {passwordError && (
+                  <div className="alert alert-error">{passwordError}</div>
+                )}
+                {passwordSuccess && (
+                  <div className="alert alert-success">{passwordSuccess}</div>
+                )}
+                <div className="form-group">
+                  <label>Parola curentă *</label>
+                  <input
+                    type="password"
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Introdu parola curentă"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Parola nouă *</label>
+                  <input
+                    type="password"
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Minim 6 caractere"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Confirmă parola nouă *</label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Confirmă parola nouă"
+                  />
+                </div>
+                <div className="form-actions">
+                  <button className="btn-primary" onClick={handlePasswordSubmit}>
+                    💾 Salvează parola
+                  </button>
+                  <button className="btn-secondary" onClick={handlePasswordCancel}>
+                    ❌ Anulează
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="password-info">Pentru securitate, schimbă-ți parola periodic.</p>
             )}
           </div>
 

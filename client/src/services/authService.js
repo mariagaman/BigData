@@ -105,6 +105,15 @@ export const updateUser = async (userData) => {
   return response.user;
 };
 
+// Change password
+export const changePassword = async (passwordData) => {
+  const response = await authenticatedRequest('/auth/change-password', {
+    method: 'PUT',
+    body: passwordData
+  });
+  return response;
+};
+
 // Logout (doar șterge token-ul)
 export const logout = () => {
   localStorage.removeItem('token');

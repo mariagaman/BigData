@@ -77,12 +77,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const changePassword = async (passwordData) => {
+    try {
+      const response = await authService.changePassword(passwordData);
+      return response;
+    } catch (error) {
+      console.error('Error changing password:', error);
+      throw error;
+    }
+  };
+
   const value = {
     user,
     login,
     register,
     logout,
     updateUser,
+    changePassword,
     isAuthenticated: !!user,
     loading
   };
