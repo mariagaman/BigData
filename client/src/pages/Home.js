@@ -1,9 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import SearchForm from '../components/SearchForm';
 import trainIcon from '../pictures/icon.jfif';
 import '../styles/Home.css';
 
 const Home = () => {
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+
+  // Redirecționează administratorii la dashboard
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'administrator') {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  // Dacă utilizatorul este administrator, nu afișa conținutul
+  if (isAuthenticated && user?.role === 'administrator') {
+    return null;
+  }
   const features = [
     {
       icon: '🎫',

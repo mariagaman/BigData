@@ -17,6 +17,7 @@ import ProfilePage from './pages/ProfilePage';
 import TicketPage from './pages/TicketPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
+import AdminDashboard from './pages/AdminDashboard';
 import './styles/App.css';
 
 function App() {
@@ -82,6 +83,14 @@ function App() {
                 />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
+                <Route 
+                  path="/admin/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
               </Routes>
             </main>
             <Footer />

@@ -39,6 +39,7 @@ app.use('/api/stations', require('./routes/stations'));
 app.use('/api/trains', require('./routes/trains'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/payments', require('./routes/payments'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Endpoint temporar pentru debugging - listează utilizatorii
 app.get('/api/debug/users', async (req, res) => {

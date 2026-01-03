@@ -122,6 +122,48 @@ export const createPayment = async (paymentData) => {
   return response.payment;
 };
 
+// Admin API
+export const getAdminDashboardStats = async (filters = {}) => {
+  const queryParams = new URLSearchParams();
+  if (filters.startDate) queryParams.append('startDate', filters.startDate);
+  if (filters.endDate) queryParams.append('endDate', filters.endDate);
+  if (filters.status) queryParams.append('status', filters.status);
+  if (filters.paymentStatus) queryParams.append('paymentStatus', filters.paymentStatus);
+  
+  const response = await apiRequest(`/admin/dashboard/stats?${queryParams}`);
+  return response.stats;
+};
+
+export const getAdminBookings = async (filters = {}) => {
+  const queryParams = new URLSearchParams();
+  Object.keys(filters).forEach(key => {
+    if (filters[key]) queryParams.append(key, filters[key]);
+  });
+  
+  const response = await apiRequest(`/admin/bookings?${queryParams}`);
+  return response;
+};
+
+export const getAdminUsers = async (filters = {}) => {
+  const queryParams = new URLSearchParams();
+  Object.keys(filters).forEach(key => {
+    if (filters[key]) queryParams.append(key, filters[key]);
+  });
+  
+  const response = await apiRequest(`/admin/users?${queryParams}`);
+  return response;
+};
+
+export const getAdminTrains = async (filters = {}) => {
+  const queryParams = new URLSearchParams();
+  Object.keys(filters).forEach(key => {
+    if (filters[key]) queryParams.append(key, filters[key]);
+  });
+  
+  const response = await apiRequest(`/admin/trains?${queryParams}`);
+  return response;
+};
+
 export const getPaymentByBookingId = async (bookingId) => {
   const response = await apiRequest(`/payments/booking/${bookingId}`);
   return response.payment;

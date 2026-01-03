@@ -38,34 +38,50 @@ const Navbar = () => {
         </button>
 
         <ul className={`navbar-menu ${menuOpen ? 'active' : ''}`}>
-          <li>
-            <Link 
-              to="/" 
-              className={`nav-link ${isActive('/') ? 'active' : ''}`}
-              onClick={() => setMenuOpen(false)}
-            >
-              Acasă
-            </Link>
-          </li>
-          <li>
-            <Link 
-              to="/search" 
-              className={`nav-link ${isActive('/search') ? 'active' : ''}`}
-              onClick={() => setMenuOpen(false)}
-            >
-              Căutare Trenuri
-            </Link>
-          </li>
-          {isAuthenticated && (
-            <li>
-              <Link 
-                to="/my-bookings" 
-                className={`nav-link ${isActive('/my-bookings') ? 'active' : ''}`}
-                onClick={() => setMenuOpen(false)}
-              >
-                Rezervările Mele
-              </Link>
-            </li>
+          {isAuthenticated && user?.role === 'administrator' ? (
+            <>
+              <li>
+                <Link 
+                  to="/admin/dashboard" 
+                  className={`nav-link ${isActive('/admin/dashboard') ? 'active' : ''}`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                <Link 
+                  to="/" 
+                  className={`nav-link ${isActive('/') ? 'active' : ''}`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Acasă
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/search" 
+                  className={`nav-link ${isActive('/search') ? 'active' : ''}`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Căutare Trenuri
+                </Link>
+              </li>
+              {isAuthenticated && (
+                <li>
+                  <Link 
+                    to="/my-bookings" 
+                    className={`nav-link ${isActive('/my-bookings') ? 'active' : ''}`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Rezervările Mele
+                  </Link>
+                </li>
+              )}
+            </>
           )}
           
           {!isAuthenticated ? (
@@ -96,7 +112,11 @@ const Navbar = () => {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
               >
                 <span className="user-avatar">👤</span>
-                <span className="user-name">{user.name}</span>
+                <span className="user-name">
+                  {user?.firstName && user?.lastName 
+                    ? `${user.firstName} ${user.lastName}`
+                    : user?.name || 'Utilizator'}
+                </span>
                 <span className="dropdown-arrow">▼</span>
               </button>
               
@@ -105,22 +125,28 @@ const Navbar = () => {
                   <div className="user-info">
                     <div className="user-avatar-large">👤</div>
                     <div className="user-details">
-                      <div className="user-name-large">{user.name}</div>
+                      <div className="user-name-large">
+                        {user?.firstName && user?.lastName 
+                          ? `${user.firstName} ${user.lastName}`
+                          : user?.name || 'Utilizator'}
+                      </div>
                       <div className="user-email">{user.email}</div>
                     </div>
                   </div>
                   <div className="dropdown-divider"></div>
-                  <Link 
-                    to="/my-bookings" 
-                    className="dropdown-item"
-                    onClick={() => {
-                      setUserMenuOpen(false);
-                      setMenuOpen(false);
-                    }}
-                  >
-                    <span>📋</span>
-                    Rezervările mele
-                  </Link>
+                  {user?.role !== 'administrator' && (
+                    <Link 
+                      to="/my-bookings" 
+                      className="dropdown-item"
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        setMenuOpen(false);
+                      }}
+                    >
+                      <span>📋</span>
+                      Rezervările mele
+                    </Link>
+                  )}
                   <Link 
                     to="/profile" 
                     className="dropdown-item"

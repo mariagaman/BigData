@@ -52,8 +52,13 @@ const Login = () => {
     if (Object.keys(newErrors).length === 0) {
       setLoading(true);
       try {
-        await login(formData.email, formData.password);
-        navigate(from, { replace: true });
+        const response = await login(formData.email, formData.password);
+        // Dacă utilizatorul este administrator, redirecționează la dashboard
+        if (response.user?.role === 'administrator') {
+          navigate('/admin/dashboard', { replace: true });
+        } else {
+          navigate(from, { replace: true });
+        }
       } catch (error) {
         setErrors({ submit: error.message || 'Autentificare eșuată. Încearcă din nou.' });
       } finally {
