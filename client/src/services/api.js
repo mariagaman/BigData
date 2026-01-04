@@ -1,8 +1,13 @@
 import API_BASE_URL from '../config/api';
 
+// Helper function pentru a obține token-ul (din localStorage sau sessionStorage)
+const getToken = () => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
+
 // Helper function pentru request-uri
 const apiRequest = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('token');
+  const token = getToken();
   
   const config = {
     headers: {

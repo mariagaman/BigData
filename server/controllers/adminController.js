@@ -6,7 +6,9 @@ const Station = require('../models/Station');
 // Obține statistici generale
 exports.getDashboardStats = async (req, res) => {
   try {
+    console.log('getDashboardStats - Starting...');
     const { startDate, endDate, status, paymentStatus } = req.query;
+    console.log('getDashboardStats - Query params:', { startDate, endDate, status, paymentStatus });
 
     // Construiește query-ul pentru filtrare
     const bookingQuery = {};
@@ -42,119 +44,188 @@ exports.getDashboardStats = async (req, res) => {
     const refundedPayments = await Booking.countDocuments({ ...bookingQuery, paymentStatus: 'rambursat' });
     
     // Venituri totale
-    const revenueData = await Booking.aggregate([
-      { $match: { ...bookingQuery, paymentStatus: 'finalizat', status: 'confirmata' } },
-      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
-    ]);
-    const totalRevenue = revenueData.length > 0 ? revenueData[0].total : 0;
+    let revenueData = [];
+    let totalRevenue = 0;
+    try {
+      revenueData = await Booking.aggregate([
+        { $match: { ...bookingQuery, paymentStatus: 'finalizat', status: 'confirmata' } },
+        { $group: { _id: null, total: { $sum: { $ifNull: ['$totalPrice', 0] } } } }
+      ]);
+      totalRevenue = revenueData.length > 0 ? (revenueData[0].total || 0) : 0;
+    } catch (error) {
+      console.error('Error in revenueData aggregation:', error);
+      totalRevenue = 0;
+    }
 
     // Bookings pe lună (ultimele 12 luni)
-    const monthlyBookings = await Booking.aggregate([
-      { $match: bookingQuery },
-      {
-        $group: {
-          _id: {
-            year: { $year: '$bookingDate' },
-            month: { $month: '$bookingDate' }
-          },
-          count: { $sum: 1 },
-          revenue: { $sum: '$totalPrice' }
-        }
-      },
-      { $sort: { '_id.year': 1, '_id.month': 1 } },
-      { $limit: 12 }
-    ]);
+    let monthlyBookings = [];
+    try {
+      monthlyBookings = await Booking.aggregate([
+        { $match: { ...bookingQuery, bookingDate: { $exists: true, $ne: null } } },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$bookingDate' },
+              month: { $month: '$bookingDate' }
+            },
+            count: { $sum: 1 },
+            revenue: { $sum: { $ifNull: ['$totalPrice', 0] } }
+          }
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } },
+        { $limit: 12 }
+      ]);
+    } catch (error) {
+      console.error('Error in monthlyBookings aggregation:', error);
+      monthlyBookings = [];
+    }
 
     // Bookings pe status
-    const bookingsByStatus = await Booking.aggregate([
-      { $match: bookingQuery },
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 }
+    let bookingsByStatus = [];
+    try {
+      bookingsByStatus = await Booking.aggregate([
+        { $match: { ...bookingQuery, status: { $exists: true } } },
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 }
+          }
         }
-      }
-    ]);
+      ]);
+    } catch (error) {
+      console.error('Error in bookingsByStatus aggregation:', error);
+      bookingsByStatus = [];
+    }
 
     // Bookings pe metodă de plată
-    const bookingsByPaymentMethod = await Booking.aggregate([
-      { $match: bookingQuery },
-      {
-        $group: {
-          _id: '$paymentMethod',
-          count: { $sum: 1 },
-          revenue: { $sum: '$totalPrice' }
+    let bookingsByPaymentMethod = [];
+    try {
+      bookingsByPaymentMethod = await Booking.aggregate([
+        { $match: { ...bookingQuery, paymentMethod: { $exists: true } } },
+        {
+          $group: {
+            _id: '$paymentMethod',
+            count: { $sum: 1 },
+            revenue: { $sum: { $ifNull: ['$totalPrice', 0] } }
+          }
         }
-      }
-    ]);
+      ]);
+    } catch (error) {
+      console.error('Error in bookingsByPaymentMethod aggregation:', error);
+      bookingsByPaymentMethod = [];
+    }
 
-    // Top 5 trenuri cele mai căutate
-    const topTrains = await Booking.aggregate([
-      { $match: { ...bookingQuery, status: 'confirmata' } },
-      {
-        $group: {
-          _id: '$train',
-          count: { $sum: 1 },
-          totalPassengers: { $sum: { $size: '$passengers' } }
-        }
-      },
-      { $sort: { count: -1 } },
-      { $limit: 5 }
-    ]);
+    // Top 5 trenuri cele mai căutate (toate rezervările, nu doar confirmate)
+    let topTrains = [];
+    try {
+      topTrains = await Booking.aggregate([
+        { $match: { ...bookingQuery, train: { $exists: true, $ne: null } } },
+        {
+          $group: {
+            _id: '$train',
+            count: { $sum: 1 },
+            totalPassengers: { 
+              $sum: { 
+                $ifNull: [
+                  { $size: { $ifNull: ['$passengers', []] } },
+                  0
+                ]
+              }
+            }
+          }
+        },
+        { $sort: { count: -1 } },
+        { $limit: 5 }
+      ]);
+    } catch (error) {
+      console.error('Error in topTrains aggregation:', error);
+      topTrains = [];
+    }
 
     // Populează detaliile trenurilor
     const topTrainsWithDetails = await Promise.all(
-      topTrains.map(async (item) => {
-        const train = await Train.findById(item._id).populate('from', 'name').populate('to', 'name');
-        return {
-          trainNumber: train ? train.trainNumber : 'N/A',
-          route: train ? `${train.from.name} - ${train.to.name}` : 'N/A',
-          bookings: item.count,
-          passengers: item.totalPassengers
-        };
-      })
+      topTrains
+        .filter(item => item._id) // Filtrează item-urile cu _id null
+        .map(async (item) => {
+          try {
+            const train = await Train.findById(item._id).populate('from', 'name').populate('to', 'name');
+            if (!train) {
+              return null;
+            }
+            return {
+              trainNumber: train.trainNumber || 'N/A',
+              route: train.from && train.to ? `${train.from.name} - ${train.to.name}` : 'N/A',
+              bookings: item.count || 0,
+              passengers: item.totalPassengers || 0
+            };
+          } catch (error) {
+            console.error('Error populating train:', error);
+            return null;
+          }
+        })
     );
+    
+    // Filtrează null-urile
+    const filteredTopTrains = topTrainsWithDetails.filter(item => item !== null);
 
     // Utilizatori noi pe lună
-    const newUsersByMonth = await User.aggregate([
-      {
-        $group: {
-          _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' }
-          },
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { '_id.year': -1, '_id.month': -1 } },
-      { $limit: 12 }
-    ]);
+    let newUsersByMonth = [];
+    try {
+      newUsersByMonth = await User.aggregate([
+        { $match: { createdAt: { $exists: true, $ne: null } } },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$createdAt' },
+              month: { $month: '$createdAt' }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { '_id.year': -1, '_id.month': -1 } },
+        { $limit: 12 }
+      ]);
+    } catch (error) {
+      console.error('Error in newUsersByMonth aggregation:', error);
+      newUsersByMonth = [];
+    }
 
-    res.json({
+    const responseData = {
       success: true,
       stats: {
         overview: {
-          totalUsers,
-          totalTrains,
-          totalBookings,
-          confirmedBookings,
-          cancelledBookings,
-          completedPayments,
-          refundedPayments,
-          totalRevenue: Math.round(totalRevenue * 100) / 100
+          totalUsers: totalUsers || 0,
+          totalTrains: totalTrains || 0,
+          totalBookings: totalBookings || 0,
+          confirmedBookings: confirmedBookings || 0,
+          cancelledBookings: cancelledBookings || 0,
+          completedPayments: completedPayments || 0,
+          refundedPayments: refundedPayments || 0,
+          totalRevenue: Math.round((totalRevenue || 0) * 100) / 100
         },
-        monthlyBookings,
-        bookingsByStatus,
-        bookingsByPaymentMethod,
-        topTrains: topTrainsWithDetails,
-        newUsersByMonth
+        monthlyBookings: monthlyBookings || [],
+        bookingsByStatus: bookingsByStatus || [],
+        bookingsByPaymentMethod: bookingsByPaymentMethod || [],
+        topTrains: filteredTopTrains || [],
+        newUsersByMonth: newUsersByMonth || []
       }
+    };
+
+    console.log('getDashboardStats - Response data:', {
+      totalUsers: responseData.stats.overview.totalUsers,
+      totalBookings: responseData.stats.overview.totalBookings,
+      monthlyBookingsCount: responseData.stats.monthlyBookings.length,
+      bookingsByStatusCount: responseData.stats.bookingsByStatus.length
     });
+
+    res.json(responseData);
   } catch (error) {
     console.error('Get dashboard stats error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Eroare la preluarea statisticilor'
+      message: 'Eroare la preluarea statisticilor',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };

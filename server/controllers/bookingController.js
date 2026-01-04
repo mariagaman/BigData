@@ -399,8 +399,9 @@ exports.getUserBookings = async (req, res) => {
       // Folosește trainSnapshot dacă există și are date valide, altfel folosește datele din train populate
       let trainData;
       
-      // Verifică dacă trainSnapshot are nume valide (nu "N/A" sau undefined)
+      // Verifică dacă trainSnapshot există și are structură validă
       const hasValidSnapshot = booking.trainSnapshot && 
+                               typeof booking.trainSnapshot === 'object' &&
                                booking.trainSnapshot.trainNumber &&
                                booking.trainSnapshot.from &&
                                booking.trainSnapshot.from !== 'N/A' &&
@@ -458,6 +459,7 @@ exports.getUserBookings = async (req, res) => {
         passengers: booking.passengers || [],
         totalPrice: booking.totalPrice,
         status: booking.status,
+        paymentStatus: booking.paymentStatus,
         bookingDate: booking.bookingDate,
         qrCode: booking.qrCode
       };
@@ -639,6 +641,7 @@ exports.cancelBooking = async (req, res) => {
     booking.status = 'anulata';
     booking.paymentStatus = 'rambursat';
     booking.cancellationDate = new Date();
+    booking.cancellationReason = 'Renuntare voluntara';
     await booking.save();
 
     // Actualizează și plata dacă există
