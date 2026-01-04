@@ -131,6 +131,14 @@ const AdminDashboard = () => {
     });
   };
 
+  const formatTime = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleTimeString('ro-RO', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   const formatCurrency = (amount) => {
     return `${amount.toFixed(2)} RON`;
   };
@@ -573,8 +581,8 @@ const AdminDashboard = () => {
                     <td>
                       {train.from?.name || 'N/A'} - {train.to?.name || 'N/A'}
                     </td>
-                    <td>{formatDate(train.departureTime)}</td>
-                    <td>{formatDate(train.arrivalTime)}</td>
+                    <td>{formatTime(train.departureTime)}</td>
+                    <td>{formatTime(train.arrivalTime)}</td>
                     <td>{formatCurrency(train.price || 0)}</td>
                     <td>{train.totalSeats || 0}</td>
                   </tr>
