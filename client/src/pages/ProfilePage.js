@@ -5,7 +5,7 @@ import '../styles/ProfilePage.css';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user, updateUser, changePassword, logout } = useAuth();
+  const { user, updateUser, changePassword, logout, deleteAccount } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -99,6 +99,30 @@ const ProfilePage = () => {
     });
     setPasswordError('');
     setPasswordSuccess('');
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmMessage = 'Ești sigur că vrei să ștergi contul? Această acțiune este permanentă și nu poate fi anulată.';
+    const confirmDelete = window.confirm(confirmMessage);
+    
+    if (!confirmDelete) {
+      return;
+    }
+
+    // Confirmare suplimentară
+    const secondConfirm = window.confirm('Această acțiune va șterge permanent contul tău și toate datele asociate. Ești absolut sigur?');
+    
+    if (!secondConfirm) {
+      return;
+    }
+
+    try {
+      await deleteAccount();
+      alert('Contul tău a fost șters cu succes.');
+      navigate('/');
+    } catch (error) {
+      alert(error.message || 'Eroare la ștergerea contului. Te rugăm să încerci din nou.');
+    }
   };
 
   return (
@@ -278,6 +302,15 @@ const ProfilePage = () => {
                 <span className="action-text">Deconectează-te</span>
               </button>
             </div>
+          </div>
+
+          <div className="profile-section danger-zone">
+            <button className="btn-danger-delete" onClick={handleDeleteAccount}>
+              🗑️ Șterge contul
+            </button>
+            <p className="danger-description">
+              Ștergerea contului va elimina permanent toate datele tale, inclusiv rezervările și plățile asociate.
+            </p>
           </div>
         </div>
       </div>

@@ -25,9 +25,14 @@ const authRequest = async (endpoint, body) => {
   }
 };
 
+// Helper function pentru a obține token-ul (din localStorage sau sessionStorage)
+const getToken = () => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
+
 // Helper function pentru request-uri autentificate
 const authenticatedRequest = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('token');
+  const token = getToken();
   
   if (!token) {
     throw new Error('Nu ești autentificat');
@@ -61,12 +66,20 @@ const authenticatedRequest = async (endpoint, options = {}) => {
 };
 
 // Login
-export const login = async (email, password) => {
+export const login = async (email, password, rememberMe = false) => {
   const response = await authRequest('/auth/login', { email, password });
   
-  // Salvează token-ul
+  // Salvează token-ul în localStorage dacă rememberMe este true, altfel în sessionStorage
   if (response.token) {
-    localStorage.setItem('token', response.token);
+    if (rememberMe) {
+      localStorage.setItem('token', response.token);
+      // Șterge din sessionStorage dacă există
+      sessionStorage.removeItem('token');
+    } else {
+      sessionStorage.setItem('token', response.token);
+      // Șterge din localStorage dacă există
+      localStorage.removeItem('token');
+    }
   }
   
   return {
@@ -75,13 +88,14 @@ export const login = async (email, password) => {
   };
 };
 
-// Register
+// Register (salvează întotdeauna în localStorage pentru că e o acțiune de înregistrare)
 export const register = async (userData) => {
   const response = await authRequest('/auth/register', userData);
   
-  // Salvează token-ul
+  // Salvează token-ul în localStorage (la înregistrare, considerăm că utilizatorul vrea să rămână conectat)
   if (response.token) {
     localStorage.setItem('token', response.token);
+    sessionStorage.removeItem('token');
   }
   
   return {
@@ -114,8 +128,20 @@ export const changePassword = async (passwordData) => {
   return response;
 };
 
-// Logout (doar șterge token-ul)
+// Logout (șterge token-ul din ambele locuri)
 export const logout = () => {
   localStorage.removeItem('token');
+  sessionStorage.removeItem('token');
+};
+
+// Delete account
+export const deleteAccount = async () => {
+  const response = await authenticatedRequest('/auth/me', {
+    method: 'DELETE'
+  });
+  // Șterge token-ul din ambele locuri după ștergerea contului
+  localStorage.removeItem('token');
+  sessionStorage.removeItem('token');
+  return response;
 };
 

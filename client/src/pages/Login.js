@@ -16,6 +16,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const from = location.state?.from?.pathname || '/';
 
@@ -52,7 +53,7 @@ const Login = () => {
     if (Object.keys(newErrors).length === 0) {
       setLoading(true);
       try {
-        const response = await login(formData.email, formData.password);
+        const response = await login(formData.email, formData.password, rememberMe);
         // Dacă utilizatorul este administrator, redirecționează la dashboard
         if (response.user?.role === 'administrator') {
           navigate('/admin/dashboard', { replace: true });
@@ -134,7 +135,11 @@ const Login = () => {
 
             <div className="form-options">
               <label className="remember-me">
-                <input type="checkbox" />
+                <input 
+                  type="checkbox" 
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
                 <span>Ține-mă minte</span>
               </label>
             </div>

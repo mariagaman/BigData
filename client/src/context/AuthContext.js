@@ -18,15 +18,17 @@ export const AuthProvider = ({ children }) => {
   // Verifică dacă utilizatorul este autentificat la încărcarea aplicației
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+      // Verifică atât localStorage cât și sessionStorage
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       if (token) {
         try {
           const userData = await authService.getCurrentUser();
           setUser(userData);
         } catch (error) {
           console.error('Error getting current user:', error);
-          // Token invalid, șterge-l
+          // Token invalid, șterge-l din ambele locuri
           localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
         }
       }
       setLoading(false);
@@ -35,9 +37,9 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, rememberMe = false) => {
     try {
-      const response = await authService.login(email, password);
+      const response = await authService.login(email, password, rememberMe);
       setUser(response.user);
       return { success: true, user: response.user };
     } catch (error) {
@@ -87,6 +89,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const deleteAccount = async () => {
+    try {
+      await authService.deleteAccount();
+      setUser(null);
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      throw error;
+    }
+  };
+
   const value = {
     user,
     login,
@@ -94,6 +107,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     changePassword,
+    deleteAccount,
     isAuthenticated: !!user,
     loading
   };

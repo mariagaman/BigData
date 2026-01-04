@@ -254,3 +254,34 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+// Delete user account
+exports.deleteUser = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Găsește utilizatorul
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilizator negăsit'
+      });
+    }
+
+    // Șterge utilizatorul din baza de date
+    await User.findByIdAndDelete(userId);
+
+    res.json({
+      success: true,
+      message: 'Contul a fost șters cu succes'
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Eroare la ștergerea contului'
+    });
+  }
+};
+
