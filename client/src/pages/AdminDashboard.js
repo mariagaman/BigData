@@ -30,7 +30,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-    // Resetează pagina când se schimbă filtrele
+    // Reseteaza pagina cand se schimba filtrele
     if (activeTab === 'bookings') {
       setBookingsPage(1);
     }
@@ -116,7 +116,7 @@ const AdminDashboard = () => {
       status: '',
       paymentStatus: ''
     });
-    // Resetează și paginile când se resetează filtrele
+    // Reseteaza si paginile cand se reseteaza filtrele
     setBookingsPage(1);
     setUsersPage(1);
     setTrainsPage(1);
@@ -151,18 +151,18 @@ const AdminDashboard = () => {
     const startPage = Math.max(1, currentPage - 2);
     const endPage = Math.min(totalPages, currentPage + 2);
 
-    // Adaugă prima pagină
+    // Adauga prima pagina
     if (startPage > 1) {
       pages.push(1);
       if (startPage > 2) pages.push('...');
     }
 
-    // Adaugă paginile din jurul paginii curente
+    // Adauga paginile din jurul paginii curente
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
 
-    // Adaugă ultima pagină
+    // Adauga ultima pagina
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) pages.push('...');
       pages.push(totalPages);
@@ -236,7 +236,7 @@ const AdminDashboard = () => {
     );
   }
 
-  // Pregătește datele pentru diagrame
+  // Pregateste datele pentru diagrame
   const monthlyBookingsData = stats.monthlyBookings?.map(item => ({
     month: `${item._id.month}/${item._id.year}`,
     bookings: item.count,

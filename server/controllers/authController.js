@@ -40,10 +40,10 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Dacă parola nu este hash-uită dar este corectă, hash-uiește-o acum
+    // Daca parola nu este hash-uita dar este corecta, hash-uieste-o acum
     if (!user.password.startsWith('$2')) {
       console.log('Password is not hashed, hashing now for user:', user.email);
-      user.password = password; // Va fi hash-uită de pre('save')
+      user.password = password; // Va fi hash-uita de pre('save')
       await user.save();
     }
 
@@ -91,7 +91,7 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Verifică dacă utilizatorul există deja
+    // Verifica daca utilizatorul exista deja
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     
     if (existingUser) {
@@ -227,7 +227,7 @@ exports.changePassword = async (req, res) => {
 
     const user = await User.findById(req.user._id);
 
-    // Verifică parola curentă
+    // Verifica parola curenta
     const isMatch = await user.comparePassword(currentPassword);
     
     if (!isMatch) {
@@ -237,8 +237,8 @@ exports.changePassword = async (req, res) => {
       });
     }
 
-    // Actualizează parola
-    user.password = newPassword; // Va fi hash-uită automat de pre('save')
+    // Actualizeaza parola
+    user.password = newPassword; // Va fi hash-uita automat de pre('save')
     await user.save();
 
     res.json({
@@ -259,7 +259,7 @@ exports.deleteUser = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // Găsește utilizatorul
+    // Gaseste utilizatorul
     const user = await User.findById(userId);
     
     if (!user) {
@@ -269,7 +269,7 @@ exports.deleteUser = async (req, res) => {
       });
     }
 
-    // Șterge utilizatorul din baza de date
+    // Sterge utilizatorul din baza de date
     await User.findByIdAndDelete(userId);
 
     res.json({

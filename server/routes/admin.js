@@ -32,7 +32,7 @@ const isAdmin = async (req, res, next) => {
   }
 };
 
-// Toate rutele necesită autentificare și rol de administrator
+// Toate rutele necesita autentificare si rol de administrator
 router.use((req, res, next) => {
   console.log('Admin router - Request received:', req.method, req.path);
   next();

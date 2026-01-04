@@ -109,7 +109,7 @@ const ProfilePage = () => {
       return;
     }
 
-    // Confirmare suplimentară
+    // Confirmare suplimentara
     const secondConfirm = window.confirm('Această acțiune va șterge permanent contul tău și toate datele asociate. Ești absolut sigur?');
     
     if (!secondConfirm) {

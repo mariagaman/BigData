@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Hash parola înainte de salvare
+// Hash parola inainte de salvare
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
@@ -44,16 +44,16 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
-// Metodă pentru compararea parolelor
+// Metoda pentru compararea parolelor
 userSchema.methods.comparePassword = async function(candidatePassword) {
   try {
-    // Verifică dacă parola este hash-uită (bcrypt hash începe cu $2a$, $2b$, $2y$)
+    // Verifica daca parola este hash-uita (bcrypt hash incepe cu $2a$, $2b$, $2y$)
     if (this.password.startsWith('$2')) {
-      // Compară cu bcrypt
+      // Compara cu bcrypt
       return await bcrypt.compare(candidatePassword, this.password);
     } else {
-      // Parola nu este hash-uită (plain text) - compară direct
-      // Aceasta este doar pentru migrare - în producție toate parolele ar trebui să fie hash-uite
+      // Parola nu este hash-uita (plain text) - compara direct
+      // Aceasta este doar pentru migrare - in productie toate parolele ar trebui sa fie hash-uite
       return this.password === candidatePassword;
     }
   } catch (error) {

@@ -15,10 +15,10 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Verifică dacă utilizatorul este autentificat la încărcarea aplicației
+  // Verifica daca utilizatorul este autentificat la incarcarea aplicatiei
   useEffect(() => {
     const checkAuth = async () => {
-      // Verifică atât localStorage cât și sessionStorage
+      // Verifica atat localStorage cat si sessionStorage
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       if (token) {
         try {
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
           setUser(userData);
         } catch (error) {
           console.error('Error getting current user:', error);
-          // Token invalid, șterge-l din ambele locuri
+          // Token invalid, sterge-l din ambele locuri
           localStorage.removeItem('token');
           sessionStorage.removeItem('token');
         }

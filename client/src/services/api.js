@@ -1,6 +1,6 @@
 import API_BASE_URL from '../config/api';
 
-// Helper function pentru a obține token-ul (din localStorage sau sessionStorage)
+// Helper function pentru a obtine token-ul (din localStorage sau sessionStorage)
 const getToken = () => {
   return localStorage.getItem('token') || sessionStorage.getItem('token');
 };
@@ -52,7 +52,7 @@ export const searchTrains = async (searchParams) => {
 
   const response = await apiRequest(`/trains/search?${queryParams}`);
   
-  // Transformă datele pentru compatibilitate cu frontend
+  // Transforma datele pentru compatibilitate cu frontend
   return response.trains.map(train => ({
     ...train,
     departureTime: new Date(train.departureTime),
@@ -61,14 +61,14 @@ export const searchTrains = async (searchParams) => {
 };
 
 export const getTrainById = async (trainId, from = null, to = null) => {
-  // Dacă există from și to, le trimite ca query params pentru calcularea corectă a prețului
+  // Daca exista from si to, le trimite ca query params pentru calcularea corecta a pretului
   let url = `/trains/${trainId}`;
   if (from && to) {
     url += `?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
   }
   const response = await apiRequest(url);
   
-  // Transformă datele pentru compatibilitate cu frontend
+  // Transforma datele pentru compatibilitate cu frontend
   return {
     ...response.train,
     departureTime: new Date(response.train.departureTime),

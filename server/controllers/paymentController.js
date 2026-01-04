@@ -16,7 +16,7 @@ exports.createPayment = async (req, res) => {
       });
     }
 
-    // Convertește bookingId la string și verifică dacă este ObjectId valid
+    // Convertește bookingId la string si verifica daca este ObjectId valid
     const mongoose = require('mongoose');
     let bookingIdObj;
     
@@ -24,12 +24,12 @@ exports.createPayment = async (req, res) => {
       // Convertește la string
       bookingIdObj = String(bookingId);
       
-      // Verifică dacă este un ObjectId valid (24 caractere hex)
+      // Verifica daca este un ObjectId valid (24 caractere hex)
       if (!mongoose.Types.ObjectId.isValid(bookingIdObj)) {
         console.error('Invalid ObjectId:', bookingIdObj, 'type:', typeof bookingId);
         console.error('BookingId length:', bookingIdObj.length, 'expected: 24');
         
-        // Dacă este un număr (timestamp), înseamnă că nu este ObjectId valid
+        // Daca este un numar (timestamp), inseamna ca nu este ObjectId valid
         if (typeof bookingId === 'number' || !isNaN(Number(bookingId))) {
           return res.status(400).json({
             success: false,
@@ -68,7 +68,7 @@ exports.createPayment = async (req, res) => {
       });
     }
 
-    // Verifică dacă utilizatorul are dreptul să plătească pentru această rezervare
+    // Verifica daca utilizatorul are dreptul sa plateasca pentru aceasta rezervare
     if (booking.userId.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
@@ -76,7 +76,7 @@ exports.createPayment = async (req, res) => {
       });
     }
 
-    // Verifică dacă există deja o plată pentru această rezervare
+    // Verifica daca exista deja o plata pentru aceasta rezervare
     const existingPayment = await Payment.findOne({ bookingId });
     if (existingPayment) {
       return res.status(400).json({
@@ -85,7 +85,7 @@ exports.createPayment = async (req, res) => {
       });
     }
 
-    // Creează plata
+    // Creeaza plata
     const payment = new Payment({
       bookingId,
       userId,
@@ -98,7 +98,7 @@ exports.createPayment = async (req, res) => {
 
     await payment.save();
 
-    // Actualizează statusul rezervării
+    // Actualizeaza statusul rezervarii
     booking.paymentStatus = 'finalizat';
     await booking.save();
 
@@ -139,7 +139,7 @@ exports.getPaymentByBookingId = async (req, res) => {
       });
     }
 
-    // Verifică dacă utilizatorul are dreptul să vadă această plată
+    // Verifica daca utilizatorul are dreptul sa vada aceasta plata
     if (payment.userId.toString() !== userId.toString() && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,

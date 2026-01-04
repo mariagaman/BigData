@@ -64,7 +64,7 @@ const MyBookings = () => {
     if (window.confirm('Ești sigur că vrei să anulezi această rezervare? Suma va fi rambursată.')) {
       try {
         await cancelBookingAPI(bookingId);
-        // Reîncarcă lista de rezervări pentru a obține datele actualizate
+        // Reincarca lista de rezervari pentru a obtine datele actualizate
         const updatedBookings = await getUserBookings();
         setUserBookings(updatedBookings);
         alert('Rezervarea a fost anulată cu succes. Suma va fi rambursată.');

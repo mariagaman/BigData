@@ -127,7 +127,7 @@ bookingSchema.index({ train: 1 });
 bookingSchema.index({ status: 1 });
 bookingSchema.index({ bookingDate: -1 });
 
-// Generare automată bookingNumber înainte de salvare
+// Generare automata bookingNumber inainte de salvare
 bookingSchema.pre('save', async function(next) {
   if (!this.bookingNumber) {
     this.bookingNumber = `RAILMATE-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;

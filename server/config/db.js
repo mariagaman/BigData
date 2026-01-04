@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
   try {
     // Conectare la MongoDB
-    // Folosește variabila de mediu MONGODB_URI sau conexiunea locală implicită
+    // Foloseste variabila de mediu MONGODB_URI sau conexiunea locala implicita
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/railmate';
     
     const conn = await mongoose.connect(mongoURI);
@@ -14,7 +14,7 @@ const connectDB = async () => {
   } catch (error) {
     console.error('❌ Eroare la conectarea la MongoDB:', error.message);
     console.error('⚠️  Serverul pornește fără conexiune la baza de date. Asigură-te că MongoDB rulează.');
-    // Nu oprim serverul, doar afișăm eroarea
+    // Nu oprim serverul, doar afisam eroarea
     // process.exit(1);
   }
 };

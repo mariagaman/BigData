@@ -9,14 +9,14 @@ const Home = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
-  // Redirecționează administratorii la dashboard
+  // Redirectioneaza administratorii la dashboard
   useEffect(() => {
     if (isAuthenticated && user?.role === 'administrator') {
       navigate('/admin/dashboard', { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
 
-  // Dacă utilizatorul este administrator, nu afișa conținutul
+  // Daca utilizatorul este administrator, nu afisa continutul
   if (isAuthenticated && user?.role === 'administrator') {
     return null;
   }

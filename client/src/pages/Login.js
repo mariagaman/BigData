@@ -54,7 +54,7 @@ const Login = () => {
       setLoading(true);
       try {
         const response = await login(formData.email, formData.password, rememberMe);
-        // Dacă utilizatorul este administrator, redirecționează la dashboard
+        // Daca utilizatorul este administrator, redirectioneaza la dashboard
         if (response.user?.role === 'administrator') {
           navigate('/admin/dashboard', { replace: true });
         } else {

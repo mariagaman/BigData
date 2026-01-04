@@ -16,7 +16,7 @@ exports.searchTrains = async (req, res) => {
       });
     }
 
-    // Găsește stațiile după nume
+    // Gaseste statiile dupa nume
     const fromStation = await Station.findOne({ name: from });
     const toStation = await Station.findOne({ name: to });
 
@@ -32,18 +32,18 @@ exports.searchTrains = async (req, res) => {
       });
     }
 
-    // Construiește query-ul - caută trenuri care merg direct sau prin stații intermediare
-    // Opțiunea 1: Trenuri care merg direct de la A la B
+    // Construieste query-ul - cauta trenuri care merg direct sau prin statii intermediare
+    // Optiunea 1: Trenuri care merg direct de la A la B
     const directQuery = {
       from: fromStation._id,
       to: toStation._id
     };
 
-    // Opțiunea 2: Trenuri care au A ca stație de plecare și B în stații intermediare
-    // Opțiunea 3: Trenuri care au A în stații intermediare și B ca stație de sosire
-    // Opțiunea 4: Trenuri care au A și B în stații intermediare (A înainte de B)
+    // Optiunea 2: Trenuri care au A ca statie de plecare si B in statii intermediare
+    // Optiunea 3: Trenuri care au A in statii intermediare si B ca statie de sosire
+    // Optiunea 4: Trenuri care au A si B in statii intermediare (A inainte de B)
 
-    // Dacă există dată, filtrează după dată
+    // Daca exista data, filtreaza dupa data
     if (date) {
       const searchDate = new Date(date);
       searchDate.setHours(0, 0, 0, 0);
@@ -56,7 +56,7 @@ exports.searchTrains = async (req, res) => {
       };
     }
 
-    // Caută trenuri directe
+    // Cauta trenuri directe
     console.log('Direct query:', JSON.stringify(directQuery, null, 2));
     const directTrains = await Train.find(directQuery)
       .populate('from', 'name city')
@@ -66,20 +66,20 @@ exports.searchTrains = async (req, res) => {
     
     console.log(`Found ${directTrains.length} direct trains`);
 
-    // Caută trenuri care trec prin stații intermediare
+    // Cauta trenuri care trec prin statii intermediare
     const intermediateQuery = {
       $or: [
-        // Tren care pleacă din A și are B în stații intermediare
+        // Tren care pleaca din A si are B in statii intermediare
         {
           from: fromStation._id,
           'route.intermediateStations.station': toStation._id
         },
-        // Tren care are A în stații intermediare și ajunge în B
+        // Tren care are A in statii intermediare si ajunge in B
         {
           'route.intermediateStations.station': fromStation._id,
           to: toStation._id
         },
-        // Tren care are atât A cât și B în stații intermediare (A înainte de B)
+        // Tren care are atat A cat si B in statii intermediare (A inainte de B)
         {
           'route.intermediateStations.station': {
             $all: [fromStation._id, toStation._id]
@@ -109,7 +109,7 @@ exports.searchTrains = async (req, res) => {
     
     console.log(`Found ${intermediateTrains.length} trains with intermediate stations`);
 
-    // Combină rezultatele și elimină duplicatele
+    // Combina rezultatele si elimina duplicatele
     const allTrains = [...directTrains];
     const trainIds = new Set(directTrains.map(t => t._id.toString()));
     
@@ -120,15 +120,15 @@ exports.searchTrains = async (req, res) => {
       }
     });
 
-    // Filtrează trenurile pentru a verifica ordinea stațiilor în cazul stațiilor intermediare
+    // Filtreaza trenurile pentru a verifica ordinea statiilor in cazul statiilor intermediare
     const trains = allTrains.filter(train => {
-      // Dacă e tren direct, îl includem
+      // Daca e tren direct, il includem
       if (train.from._id.toString() === fromStation._id.toString() && 
           train.to._id.toString() === toStation._id.toString()) {
         return true;
       }
 
-      // Verifică dacă există stații intermediare
+      // Verifica daca exista statii intermediare
       if (!train.route || !train.route.intermediateStations || train.route.intermediateStations.length === 0) {
         return false;
       }
@@ -141,17 +141,17 @@ exports.searchTrains = async (req, res) => {
         s => s.station && s.station._id && s.station._id.toString() === toStation._id.toString()
       );
 
-      // Cazul 1: Pleacă din A, are B în intermediare
+      // Cazul 1: Pleaca din A, are B in intermediare
       if (train.from._id.toString() === fromStation._id.toString() && toIndex !== -1) {
         return true;
       }
 
-      // Cazul 2: Are A în intermediare, ajunge în B
+      // Cazul 2: Are A in intermediare, ajunge in B
       if (fromIndex !== -1 && train.to._id.toString() === toStation._id.toString()) {
         return true;
       }
 
-      // Cazul 3: Are A și B în intermediare, A înainte de B
+      // Cazul 3: Are A si B in intermediare, A inainte de B
       if (fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex) {
         return true;
       }
@@ -161,10 +161,10 @@ exports.searchTrains = async (req, res) => {
 
     console.log(`Total trains after filtering: ${trains.length}`);
 
-    // Calculează locurile disponibile pentru fiecare tren
+    // Calculeaza locurile disponibile pentru fiecare tren
     const trainsWithAvailability = await Promise.all(
       trains.map(async (train) => {
-        // Numără pasagerii din rezervările confirmate cu plată finalizată
+        // Numara pasagerii din rezervarile confirmate cu plata finalizata
         const confirmedBookings = await Booking.find({
           train: train._id,
           status: 'confirmata',
@@ -190,7 +190,7 @@ exports.searchTrains = async (req, res) => {
       })
     );
 
-    // Transformă rezultatele pentru a fi compatibile cu frontend-ul
+    // Transforma rezultatele pentru a fi compatibile cu frontend-ul
     const formattedTrains = trainsWithAvailability.map(train => {
       let actualFrom = train.from.name;
       let actualTo = train.to.name;
@@ -198,7 +198,7 @@ exports.searchTrains = async (req, res) => {
       let actualArrivalTime = train.arrivalTime;
       let actualPrice = train.price;
 
-      // Dacă trenul trece prin stații intermediare, calculează orele și prețul pentru secțiunea căutată
+      // Daca trenul trece prin statii intermediare, calculeaza orele si pretul pentru sectiunea cautata
       if (train.route && train.route.intermediateStations && train.route.intermediateStations.length > 0) {
         const intermediateStations = train.route.intermediateStations;
         const fromIndex = intermediateStations.findIndex(
@@ -208,40 +208,40 @@ exports.searchTrains = async (req, res) => {
           s => s.station && s.station._id && s.station._id.toString() === toStation._id.toString()
         );
 
-        // Cazul 1: Pleacă din A (stație de plecare), are B în intermediare
+        // Cazul 1: Pleaca din A (statie de plecare), are B in intermediare
         if (train.from._id.toString() === fromStation._id.toString() && toIndex !== -1) {
           actualFrom = train.from.name;
           actualTo = intermediateStations[toIndex].station.name;
           actualDepartureTime = train.departureTime;
           actualArrivalTime = intermediateStations[toIndex].arrivalTime;
-          // Preț proporțional cu distanța
+          // Pret proportional cu distanta
           const totalDistance = intermediateStations[toIndex].distanceFromStart;
           const fullDistance = train.route.intermediateStations[train.route.intermediateStations.length - 1]?.distanceFromStart || totalDistance;
           actualPrice = fullDistance > 0 ? Math.round((train.price * totalDistance / fullDistance) * 100) / 100 : train.price;
           console.log(`Price calculation (case 1): trainPrice=${train.price}, totalDistance=${totalDistance}, fullDistance=${fullDistance}, calculatedPrice=${actualPrice}`);
         }
-        // Cazul 2: Are A în intermediare, ajunge în B
+        // Cazul 2: Are A in intermediare, ajunge in B
         else if (fromIndex !== -1 && train.to._id.toString() === toStation._id.toString()) {
           actualFrom = intermediateStations[fromIndex].station.name;
           actualTo = train.to.name;
           actualDepartureTime = intermediateStations[fromIndex].departureTime;
           actualArrivalTime = train.arrivalTime;
-          // Preț proporțional cu distanța
+          // Pret proportional cu distanta
           const fromDistance = intermediateStations[fromIndex].distanceFromStart;
           const lastIntermediateDistance = intermediateStations[intermediateStations.length - 1]?.distanceFromStart || fromDistance;
           
-          // Dacă fromIndex este ultima stație intermediară, calculăm prețul bazat pe timp
+          // Daca fromIndex este ultima statie intermediara, calculam pretul bazat pe timp
           if (fromIndex === intermediateStations.length - 1) {
-            // Dacă stația intermediară este ultima, calculăm prețul pentru ultimul segment bazat pe timp
+            // Daca statia intermediara este ultima, calculam pretul pentru ultimul segment bazat pe timp
             const totalTime = train.arrivalTime.getTime() - train.departureTime.getTime();
             const remainingTime = train.arrivalTime.getTime() - intermediateStations[fromIndex].departureTime.getTime();
             const timeRatio = totalTime > 0 ? remainingTime / totalTime : 0.1; // Minimum 10% pentru ultimul segment
             actualPrice = Math.round((train.price * timeRatio) * 100) / 100;
             console.log(`Price calculation (case 2 - last intermediate): trainPrice=${train.price}, totalTime=${totalTime}ms, remainingTime=${remainingTime}ms, timeRatio=${timeRatio}, calculatedPrice=${actualPrice}`);
           } else {
-            // Dacă nu este ultima stație intermediară, calculăm normal
-            // Adăugăm o estimare pentru distanța de la ultima stație intermediară până la finală
-            // Folosim o proporție de 15% din distanța ultimei stații intermediare pentru ultimul segment
+            // Daca nu este ultima statie intermediara, calculam normal
+            // Adaugam o estimare pentru distanta de la ultima statie intermediara pana la finala
+            // Folosim o proportie de 15% din distanta ultimei statii intermediare pentru ultimul segment
             const estimatedFinalSegment = lastIntermediateDistance * 0.15;
             const totalEstimatedDistance = lastIntermediateDistance + estimatedFinalSegment;
             const actualRemainingDistance = totalEstimatedDistance - fromDistance;
@@ -249,13 +249,13 @@ exports.searchTrains = async (req, res) => {
             console.log(`Price calculation (case 2): trainPrice=${train.price}, fromDistance=${fromDistance}, lastIntermediateDistance=${lastIntermediateDistance}, estimatedFinalSegment=${estimatedFinalSegment}, totalEstimatedDistance=${totalEstimatedDistance}, actualRemainingDistance=${actualRemainingDistance}, calculatedPrice=${actualPrice}`);
           }
         }
-        // Cazul 3: Are A și B în intermediare
+        // Cazul 3: Are A si B in intermediare
         else if (fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex) {
           actualFrom = intermediateStations[fromIndex].station.name;
           actualTo = intermediateStations[toIndex].station.name;
           actualDepartureTime = intermediateStations[fromIndex].departureTime;
           actualArrivalTime = intermediateStations[toIndex].arrivalTime;
-          // Preț proporțional cu distanța
+          // Pret proportional cu distanta
           const fromDistance = intermediateStations[fromIndex].distanceFromStart;
           const toDistance = intermediateStations[toIndex].distanceFromStart;
           const segmentDistance = toDistance - fromDistance;
@@ -309,7 +309,7 @@ exports.getTrainById = async (req, res) => {
       });
     }
 
-    // Calculează locurile disponibile
+    // Calculeaza locurile disponibile
     const confirmedBookings = await Booking.find({
       train: train._id,
       status: 'confirmata',
@@ -328,7 +328,7 @@ exports.getTrainById = async (req, res) => {
     
     console.log(`GetTrainById ${train.trainNumber}: Total seats: ${train.totalSeats}, Booked: ${bookedSeats}, Available: ${availableSeats}`);
 
-    // Dacă sunt furnizați parametrii from și to, calculează prețul și timpurile pentru secțiunea intermediară
+    // Daca sunt furnizati parametrii from si to, calculeaza pretul si timpurile pentru sectiunea intermediara
     let actualFrom = train.from.name;
     let actualTo = train.to.name;
     let actualDepartureTime = train.departureTime;
@@ -339,7 +339,7 @@ exports.getTrainById = async (req, res) => {
     if (from && to) {
       console.log(`GetTrainById - calculating intermediate segment: ${from} -> ${to}`);
       
-      // Găsește stațiile
+      // Gaseste statiile
       const Station = require('../models/Station');
       const fromStation = await Station.findOne({ name: from });
       const toStation = await Station.findOne({ name: to });
@@ -353,7 +353,7 @@ exports.getTrainById = async (req, res) => {
           s => s.station && s.station._id && s.station._id.toString() === toStation._id.toString()
         );
 
-        // Cazul 1: Pleacă din A (stație de plecare), are B în intermediare
+        // Cazul 1: Pleaca din A (statie de plecare), are B in intermediare
         if (train.from._id.toString() === fromStation._id.toString() && toIndex !== -1) {
           actualFrom = train.from.name;
           actualTo = intermediateStations[toIndex].station.name;
@@ -364,7 +364,7 @@ exports.getTrainById = async (req, res) => {
           actualPrice = fullDistance > 0 ? Math.round((train.price * totalDistance / fullDistance) * 100) / 100 : train.price;
           console.log(`GetTrainById - Price calculation (case 1): trainPrice=${train.price}, totalDistance=${totalDistance}, fullDistance=${fullDistance}, calculatedPrice=${actualPrice}`);
         }
-        // Cazul 2: Are A în intermediare, ajunge în B
+        // Cazul 2: Are A in intermediare, ajunge in B
         else if (fromIndex !== -1 && train.to._id.toString() === toStation._id.toString()) {
           actualFrom = intermediateStations[fromIndex].station.name;
           actualTo = train.to.name;
@@ -373,18 +373,18 @@ exports.getTrainById = async (req, res) => {
           const fromDistance = intermediateStations[fromIndex].distanceFromStart;
           const lastIntermediateDistance = intermediateStations[intermediateStations.length - 1]?.distanceFromStart || fromDistance;
           
-          // Dacă fromIndex este ultima stație intermediară, calculăm prețul bazat pe timp
+          // Daca fromIndex este ultima statie intermediara, calculam pretul bazat pe timp
           if (fromIndex === intermediateStations.length - 1) {
-            // Dacă stația intermediară este ultima, calculăm prețul pentru ultimul segment bazat pe timp
+            // Daca statia intermediara este ultima, calculam pretul pentru ultimul segment bazat pe timp
             const totalTime = train.arrivalTime.getTime() - train.departureTime.getTime();
             const remainingTime = train.arrivalTime.getTime() - intermediateStations[fromIndex].departureTime.getTime();
             const timeRatio = totalTime > 0 ? remainingTime / totalTime : 0.1; // Minimum 10% pentru ultimul segment
             actualPrice = Math.round((train.price * timeRatio) * 100) / 100;
             console.log(`GetTrainById - Price calculation (case 2 - last intermediate): trainPrice=${train.price}, totalTime=${totalTime}ms, remainingTime=${remainingTime}ms, timeRatio=${timeRatio}, calculatedPrice=${actualPrice}`);
           } else {
-            // Dacă nu este ultima stație intermediară, calculăm normal
-            // Adăugăm o estimare pentru distanța de la ultima stație intermediară până la finală
-            // Folosim o proporție de 15% din distanța ultimei stații intermediare pentru ultimul segment
+            // Daca nu este ultima statie intermediara, calculam normal
+            // Adaugam o estimare pentru distanta de la ultima statie intermediara pana la finala
+            // Folosim o proportie de 15% din distanta ultimei statii intermediare pentru ultimul segment
             const estimatedFinalSegment = lastIntermediateDistance * 0.15;
             const totalEstimatedDistance = lastIntermediateDistance + estimatedFinalSegment;
             const actualRemainingDistance = totalEstimatedDistance - fromDistance;
@@ -392,7 +392,7 @@ exports.getTrainById = async (req, res) => {
             console.log(`GetTrainById - Price calculation (case 2): trainPrice=${train.price}, fromDistance=${fromDistance}, lastIntermediateDistance=${lastIntermediateDistance}, estimatedFinalSegment=${estimatedFinalSegment}, totalEstimatedDistance=${totalEstimatedDistance}, actualRemainingDistance=${actualRemainingDistance}, calculatedPrice=${actualPrice}`);
           }
         }
-        // Cazul 3: Are A și B în intermediare
+        // Cazul 3: Are A si B in intermediare
         else if (fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex) {
           actualFrom = intermediateStations[fromIndex].station.name;
           actualTo = intermediateStations[toIndex].station.name;

@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   if (req.body && Object.keys(req.body).length > 0) {
-    // Nu logăm parola completă pentru securitate
+    // Nu logam parola completa pentru securitate
     const logBody = { ...req.body };
     if (logBody.password) {
       logBody.password = '***';
@@ -41,7 +41,7 @@ app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/admin', require('./routes/admin'));
 
-// Endpoint temporar pentru debugging - listează utilizatorii
+// Endpoint temporar pentru debugging - listeaza utilizatorii
 app.get('/api/debug/users', async (req, res) => {
   try {
     const User = require('./models/User');
@@ -52,14 +52,14 @@ app.get('/api/debug/users', async (req, res) => {
   }
 });
 
-// Endpoint temporar pentru debugging - listează rezervările unui utilizator (după userId sau email)
+// Endpoint temporar pentru debugging - listeaza rezervarile unui utilizator (dupa userId sau email)
 app.get('/api/debug/bookings/user/:identifier', async (req, res) => {
   try {
     const Booking = require('./models/Booking');
     const User = require('./models/User');
     const { identifier } = req.params;
     
-    // Verifică dacă identifier-ul este un email sau un ObjectId
+    // Verifica daca identifier-ul este un email sau un ObjectId
     let user;
     if (identifier.includes('@')) {
       // Este un email
@@ -98,7 +98,7 @@ app.get('/api/debug/bookings/user/:identifier', async (req, res) => {
   }
 });
 
-// Endpoint temporar pentru debugging - listează toate rezervările
+// Endpoint temporar pentru debugging - listeaza toate rezervarile
 app.get('/api/debug/bookings', async (req, res) => {
   try {
     const Booking = require('./models/Booking');
@@ -119,7 +119,7 @@ app.get('/api/debug/bookings', async (req, res) => {
   }
 });
 
-// Endpoint temporar pentru debugging - listează toate trenurile
+// Endpoint temporar pentru debugging - listeaza toate trenurile
 app.get('/api/debug/trains', async (req, res) => {
   try {
     const Train = require('./models/Train');
@@ -160,7 +160,7 @@ app.get('/api/debug/trains', async (req, res) => {
   }
 });
 
-// Endpoint temporar pentru debugging - verifică token-ul și userId-ul
+// Endpoint temporar pentru debugging - verifica token-ul si userId-ul
 app.get('/api/debug/auth-check', async (req, res) => {
   try {
     const auth = require('./middleware/auth');
@@ -215,10 +215,10 @@ app.get('/api/debug/auth-check', async (req, res) => {
 // Port
 const PORT = process.env.PORT || 5001;
 
-// Pornește serverul și conectează baza de date
+// Porneste serverul si conecteaza baza de date
 app.listen(PORT, async () => {
   console.log(`🚂 Server RailMate rulează pe portul ${PORT}`);
-  // Conectare la baza de date după ce serverul pornește
+  // Conectare la baza de date dupa ce serverul porneste
   await connectDB();
 });
 

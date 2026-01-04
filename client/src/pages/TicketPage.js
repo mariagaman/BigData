@@ -94,7 +94,7 @@ const TicketPage = () => {
     });
   };
 
-  // Generăm un cod unic pentru bilet
+  // Generam un cod unic pentru bilet
   const ticketCode = booking.bookingNumber || `RAILMATE-${booking.id}-${booking.train.trainNumber}-${formatDateShort(booking.train.departureTime).replace(/\//g, '')}`;
   
   // Date pentru QR code - folosim bookingNumber ca identificator principal
@@ -108,14 +108,14 @@ const TicketPage = () => {
     code: ticketCode
   });
   
-  // Generează URL pentru QR code dacă nu există deja
+  // Genereaza URL pentru QR code daca nu exista deja
   const qrCodeUrl = booking.qrCode || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
 
   const handlePrint = () => {
     window.print();
   };
 
-  // Funcție pentru eliminarea diacriticelor
+  // Functie pentru eliminarea diacriticelor
   const removeDiacritics = (str) => {
     if (!str) return '';
     return str
@@ -146,7 +146,7 @@ const TicketPage = () => {
       const textColor = [50, 50, 50];
       const lightGray = [240, 240, 240];
 
-      // Header cu logo și număr bilet
+      // Header cu logo si numar bilet
       doc.setFillColor(...primaryColor);
       doc.rect(0, 0, 210, 40, 'F');
       
@@ -166,7 +166,7 @@ const TicketPage = () => {
       doc.setTextColor(...textColor);
       let yPos = 50;
 
-      // Informații despre traseu
+      // Informatii despre traseu
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.text('Detalii calatorie', 15, yPos);
@@ -230,9 +230,9 @@ const TicketPage = () => {
       doc.text('Cod QR Bilet', 15, yPos);
       yPos += 8;
 
-      // Generează QR code-ul direct
+      // Genereaza QR code-ul direct
       try {
-        // Generează QR code-ul ca data URL (base64)
+        // Genereaza QR code-ul ca data URL (base64)
         const qrDataString = booking.bookingNumber || booking.id.toString();
         const qrDataUrl = await QRCodeLib.toDataURL(qrDataString, {
           width: 200,
@@ -243,10 +243,10 @@ const TicketPage = () => {
           }
         });
 
-        // Adaugă QR code-ul în PDF
+        // Adauga QR code-ul in PDF
         doc.addImage(qrDataUrl, 'PNG', 15, yPos, 40, 40);
         
-        // Adaugă codul biletului lângă QR code
+        // Adauga codul biletului langa QR code
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
         doc.text(`Cod bilet: ${booking.bookingNumber || booking.id}`, 60, yPos + 20);
@@ -275,13 +275,13 @@ const TicketPage = () => {
           yPos = 20;
         }
         
-        // Calculează înălțimea necesară pentru acest pasager
-        let passengerHeight = 8; // Înălțime minimă
+        // Calculeaza inaltimea necesara pentru acest pasager
+        let passengerHeight = 8; // Inaltime minima
         if (passenger.email) passengerHeight += 5;
         if (passenger.phone) passengerHeight += 5;
         if (passenger.wagonNumber && passenger.seatNumber) passengerHeight += 5;
         
-        // Desenează fundalul gri pentru întreaga secțiune
+        // Deseneaza fundalul gri pentru intreaga sectiune
         doc.setFillColor(...lightGray);
         doc.rect(15, yPos - 5, 180, passengerHeight, 'F');
         
@@ -307,7 +307,7 @@ const TicketPage = () => {
         yPos += passengerHeight + 3;
       });
 
-      // Footer pe fiecare pagină
+      // Footer pe fiecare pagina
       const pageCount = doc.internal.pages.length - 1;
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -324,7 +324,7 @@ const TicketPage = () => {
         doc.text(`Pagina ${i} din ${pageCount}`, 105, 290, { align: 'center' });
       }
 
-      // Descarcă PDF-ul
+      // Descarca PDF-ul
       const fileName = `Bilet_${booking.bookingNumber || booking.id}_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
     } catch (error) {
@@ -416,7 +416,7 @@ const TicketPage = () => {
                   alt="QR Code" 
                   className="qr-code-image"
                   onError={(e) => {
-                    // Fallback dacă imaginea nu se încarcă
+                    // Fallback daca imaginea nu se incarca
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'block';
                   }}

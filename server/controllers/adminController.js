@@ -3,14 +3,14 @@ const Train = require('../models/Train');
 const Booking = require('../models/Booking');
 const Station = require('../models/Station');
 
-// Obține statistici generale
+// Obtine statistici generale
 exports.getDashboardStats = async (req, res) => {
   try {
     console.log('getDashboardStats - Starting...');
     const { startDate, endDate, status, paymentStatus } = req.query;
     console.log('getDashboardStats - Query params:', { startDate, endDate, status, paymentStatus });
 
-    // Construiește query-ul pentru filtrare
+    // Construieste query-ul pentru filtrare
     const bookingQuery = {};
     if (startDate || endDate) {
       bookingQuery.bookingDate = {};
@@ -39,7 +39,7 @@ exports.getDashboardStats = async (req, res) => {
     const confirmedBookings = await Booking.countDocuments({ ...bookingQuery, status: 'confirmata' });
     const cancelledBookings = await Booking.countDocuments({ ...bookingQuery, status: 'anulata' });
     
-    // Statistici plăți
+    // Statistici plati
     const completedPayments = await Booking.countDocuments({ ...bookingQuery, paymentStatus: 'finalizat' });
     const refundedPayments = await Booking.countDocuments({ ...bookingQuery, paymentStatus: 'rambursat' });
     
@@ -57,7 +57,7 @@ exports.getDashboardStats = async (req, res) => {
       totalRevenue = 0;
     }
 
-    // Bookings pe lună (ultimele 12 luni)
+    // Bookings pe luna (ultimele 12 luni)
     let monthlyBookings = [];
     try {
       monthlyBookings = await Booking.aggregate([
@@ -97,7 +97,7 @@ exports.getDashboardStats = async (req, res) => {
       bookingsByStatus = [];
     }
 
-    // Bookings pe metodă de plată
+    // Bookings pe metoda de plata
     let bookingsByPaymentMethod = [];
     try {
       bookingsByPaymentMethod = await Booking.aggregate([
@@ -115,7 +115,7 @@ exports.getDashboardStats = async (req, res) => {
       bookingsByPaymentMethod = [];
     }
 
-    // Top 5 trenuri cele mai căutate (toate rezervările, nu doar confirmate)
+    // Top 5 trenuri cele mai cautate (toate rezervarile, nu doar confirmate)
     let topTrains = [];
     try {
       topTrains = await Booking.aggregate([
@@ -142,10 +142,10 @@ exports.getDashboardStats = async (req, res) => {
       topTrains = [];
     }
 
-    // Populează detaliile trenurilor
+    // Populeaza detaliile trenurilor
     const topTrainsWithDetails = await Promise.all(
       topTrains
-        .filter(item => item._id) // Filtrează item-urile cu _id null
+        .filter(item => item._id) // Filtreaza item-urile cu _id null
         .map(async (item) => {
           try {
             const train = await Train.findById(item._id).populate('from', 'name').populate('to', 'name');
@@ -165,10 +165,10 @@ exports.getDashboardStats = async (req, res) => {
         })
     );
     
-    // Filtrează null-urile
+    // Filtreaza null-urile
     const filteredTopTrains = topTrainsWithDetails.filter(item => item !== null);
 
-    // Utilizatori noi pe lună
+    // Utilizatori noi pe luna
     let newUsersByMonth = [];
     try {
       newUsersByMonth = await User.aggregate([
@@ -230,7 +230,7 @@ exports.getDashboardStats = async (req, res) => {
   }
 };
 
-// Obține lista de bookings cu filtre
+// Obtine lista de bookings cu filtre
 exports.getBookings = async (req, res) => {
   try {
     const { 
@@ -293,7 +293,7 @@ exports.getBookings = async (req, res) => {
   }
 };
 
-// Obține lista de utilizatori
+// Obtine lista de utilizatori
 exports.getUsers = async (req, res) => {
   try {
     const { page = 1, limit = 20, role, search } = req.query;
@@ -337,7 +337,7 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// Obține lista de trenuri
+// Obtine lista de trenuri
 exports.getTrains = async (req, res) => {
   try {
     const { page = 1, limit = 20, type, search } = req.query;

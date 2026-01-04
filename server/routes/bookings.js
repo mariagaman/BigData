@@ -3,7 +3,7 @@ const router = express.Router();
 const bookingController = require('../controllers/bookingController');
 const auth = require('../middleware/auth');
 
-// Toate rutele necesită autentificare
+// Toate rutele necesita autentificare
 router.post('/', auth, bookingController.createBooking);
 router.get('/user', auth, bookingController.getUserBookings);
 router.get('/:id', auth, bookingController.getBookingById);

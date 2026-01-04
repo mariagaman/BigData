@@ -27,14 +27,14 @@ exports.createBooking = async (req, res) => {
       });
     }
 
-    // Obține toate rezervările existente pentru a calcula locurile ocupate
+    // Obtine toate rezervarile existente pentru a calcula locurile ocupate
     const existingBookings = await Booking.find({
       train: trainId,
       status: 'confirmata',
       paymentStatus: 'finalizat'
     });
 
-    // Creează un set cu locurile ocupate
+    // Creeaza un set cu locurile ocupate
     const occupiedSeats = new Set();
     existingBookings.forEach(booking => {
       if (booking.passengers && Array.isArray(booking.passengers)) {
@@ -45,23 +45,23 @@ exports.createBooking = async (req, res) => {
       }
     });
 
-    // Funcție pentru a găsi următorul loc disponibil
+    // Functie pentru a gasi urmatorul loc disponibil
     const findNextAvailableSeat = (startWagon = 1, startSeatIndex = 0) => {
-      // Sortează vagoanele după număr
+      // Sorteaza vagoanele dupa numar
       const sortedWagons = [...(train.wagons || [])].sort((a, b) => a.wagonNumber - b.wagonNumber);
       
-      // Începe de la vagonul specificat
+      // Incepe de la vagonul specificat
       for (let w = sortedWagons.findIndex(w => w.wagonNumber >= startWagon); w < sortedWagons.length; w++) {
         const wagon = sortedWagons[w];
         if (!wagon.seats || wagon.seats.length === 0) continue;
         
-        // Sortează scaunele (presupunând că sunt în ordine)
+        // Sorteaza scaunele (presupunand ca sunt in ordine)
         const sortedSeats = [...wagon.seats].sort((a, b) => {
-          // Compară scaunele (ex: "1A" < "1B" < "2A")
+          // Compara scaunele (ex: "1A" < "1B" < "2A")
           return a.seatNumber.localeCompare(b.seatNumber);
         });
         
-        // Dacă e primul vagon, începe de la startSeatIndex, altfel de la început
+        // Daca e primul vagon, incepe de la startSeatIndex, altfel de la inceput
         const startIndex = (w === 0 && startWagon === sortedWagons[0].wagonNumber) ? startSeatIndex : 0;
         
         for (let s = startIndex; s < sortedSeats.length; s++) {
@@ -76,7 +76,7 @@ exports.createBooking = async (req, res) => {
       return null; // Nu mai sunt locuri disponibile
     };
 
-    // Procesează fiecare pasager și alocă locuri
+    // Proceseaza fiecare pasager si aloca locuri
     const assignedSeats = [];
     const seatAllocationErrors = [];
     
@@ -84,39 +84,39 @@ exports.createBooking = async (req, res) => {
       const passenger = passengers[i];
       let assignedSeat = null;
       
-      // Dacă pasagerul are deja vagon și scaun specificat
+      // Daca pasagerul are deja vagon si scaun specificat
       if (passenger.wagonNumber && passenger.seatNumber) {
-        // Verifică dacă vagonul există
+        // Verifica daca vagonul exista
         const wagon = train.wagons?.find(w => w.wagonNumber === passenger.wagonNumber);
         if (!wagon) {
           seatAllocationErrors.push(
             `Vagonul ${passenger.wagonNumber} nu există în trenul ${train.trainNumber}`
           );
-          // Alocă automat un loc disponibil
+          // Aloca automat un loc disponibil
           assignedSeat = findNextAvailableSeat();
         } else {
-          // Verifică dacă scaunul există în vagon
+          // Verifica daca scaunul exista in vagon
           const seat = wagon.seats?.find(s => s.seatNumber === passenger.seatNumber);
           if (!seat) {
             seatAllocationErrors.push(
               `Scaunul ${passenger.seatNumber} nu există în vagonul ${passenger.wagonNumber}`
             );
-            // Alocă automat un loc disponibil din același vagon
+            // Aloca automat un loc disponibil din acelasi vagon
             const wagonSeats = wagon.seats.sort((a, b) => a.seatNumber.localeCompare(b.seatNumber));
             const seatIndex = wagonSeats.findIndex(s => s.seatNumber === passenger.seatNumber);
             assignedSeat = findNextAvailableSeat(passenger.wagonNumber, seatIndex + 1);
             if (!assignedSeat) {
-              // Dacă nu mai sunt locuri în vagon, caută în următorul
+              // Daca nu mai sunt locuri in vagon, cauta in urmatorul
               assignedSeat = findNextAvailableSeat(passenger.wagonNumber + 1, 0);
             }
           } else {
-            // Verifică dacă locul este disponibil
+            // Verifica daca locul este disponibil
             const key = `${passenger.wagonNumber}-${passenger.seatNumber}`;
             if (occupiedSeats.has(key)) {
-              // Locul este ocupat, alocă automat următorul disponibil
+              // Locul este ocupat, aloca automat urmatorul disponibil
               assignedSeat = findNextAvailableSeat(passenger.wagonNumber);
               if (!assignedSeat) {
-                // Dacă nu mai sunt locuri în vagon, caută în următorul
+                // Daca nu mai sunt locuri in vagon, cauta in urmatorul
                 assignedSeat = findNextAvailableSeat(passenger.wagonNumber + 1, 0);
               }
             } else {
@@ -126,16 +126,16 @@ exports.createBooking = async (req, res) => {
           }
         }
       } else {
-        // Pasagerul nu are loc specificat, alocă automat
+        // Pasagerul nu are loc specificat, aloca automat
         const lastAssigned = assignedSeats[assignedSeats.length - 1];
         if (lastAssigned) {
-          // Continuă de la ultimul loc alocat
+          // Continua de la ultimul loc alocat
           assignedSeat = findNextAvailableSeat(lastAssigned.wagonNumber);
           if (!assignedSeat) {
             assignedSeat = findNextAvailableSeat(lastAssigned.wagonNumber + 1, 0);
           }
         } else {
-          // Primul pasager, începe de la primul vagon
+          // Primul pasager, incepe de la primul vagon
           assignedSeat = findNextAvailableSeat(1, 0);
         }
       }
@@ -151,7 +151,7 @@ exports.createBooking = async (req, res) => {
       assignedSeats.push(assignedSeat);
     }
 
-    // Actualizează pasagerii cu locurile alocate
+    // Actualizeaza pasagerii cu locurile alocate
     const passengersWithSeats = passengers.map((passenger, index) => ({
       ...passenger,
       wagonNumber: assignedSeats[index].wagonNumber,
@@ -166,18 +166,18 @@ exports.createBooking = async (req, res) => {
     console.log(`Assigned seats:`, assignedSeats);
     console.log(`Currently occupied seats:`, Array.from(occupiedSeats));
 
-    // Folosește stațiile și prețul trimise de frontend (care pot fi pentru secțiune intermediară)
-    // IMPORTANT: Prioritizează datele trimise de frontend (from, to, price) care sunt pentru secțiunea reală căutată
+    // Foloseste statiile si pretul trimise de frontend (care pot fi pentru sectiune intermediara)
+    // IMPORTANT: Prioritizeaza datele trimise de frontend (from, to, price) care sunt pentru sectiunea reala cautata
     const Station = require('../models/Station');
     
-    // Folosește întotdeauna datele trimise de frontend dacă există (sunt pentru secțiunea intermediară)
+    // Foloseste intotdeauna datele trimise de frontend daca exista (sunt pentru sectiunea intermediara)
     let actualFrom = from;
     let actualTo = to;
     let actualDepartureTime = departureTime ? new Date(departureTime) : train.departureTime;
     let actualArrivalTime = arrivalTime ? new Date(arrivalTime) : train.arrivalTime;
     let actualPrice = price;
     
-    // Fallback doar dacă nu sunt trimise date de frontend
+    // Fallback doar daca nu sunt trimise date de frontend
     if (!actualFrom) {
       actualFrom = train.from.name || train.from;
     }
@@ -200,8 +200,8 @@ exports.createBooking = async (req, res) => {
       trainPrice: train.price
     });
     
-    // Dacă from/to sunt string-uri (nume stații), le folosim direct
-    // Dacă sunt ObjectId-uri, le populează
+    // Daca from/to sunt string-uri (nume statii), le folosim direct
+    // Daca sunt ObjectId-uri, le populeaza
     if (typeof actualFrom === 'object' && actualFrom._id) {
       if (!actualFrom.name) {
         const fromStation = await Station.findById(actualFrom._id);
@@ -219,12 +219,12 @@ exports.createBooking = async (req, res) => {
       }
     }
     
-    // Dacă nu s-a trimis preț de la frontend, calculează-l pentru secțiunea intermediară
+    // Daca nu s-a trimis pret de la frontend, calculeaza-l pentru sectiunea intermediara
     if (!price && train.route && train.route.intermediateStations && train.route.intermediateStations.length > 0) {
-      // Găsește stațiile în ruta intermediară
+      // Gaseste statiile in ruta intermediara
       const intermediateStations = train.route.intermediateStations;
       
-      // Găsește index-ul stației de plecare
+      // Gaseste index-ul statiei de plecare
       const fromStationObj = await Station.findOne({ name: actualFrom });
       const toStationObj = await Station.findOne({ name: actualTo });
       
@@ -236,7 +236,7 @@ exports.createBooking = async (req, res) => {
           s => s.station && s.station.toString() === toStationObj._id.toString()
         );
         
-        // Dacă ambele stații sunt în ruta intermediară, calculează prețul proporțional
+        // Daca ambele statii sunt in ruta intermediara, calculeaza pretul proportional
         if (fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex) {
           const fromDistance = intermediateStations[fromIndex].distanceFromStart;
           const toDistance = intermediateStations[toIndex].distanceFromStart;
@@ -252,14 +252,14 @@ exports.createBooking = async (req, res) => {
             calculatedPrice: actualPrice
           });
         }
-        // Dacă pleacă din stația principală și ajunge într-o stație intermediară
+        // Daca pleaca din statia principala si ajunge intr-o statie intermediara
         else if (train.from._id.toString() === fromStationObj._id.toString() && toIndex !== -1) {
           const totalDistance = intermediateStations[toIndex].distanceFromStart;
           const fullDistance = intermediateStations[intermediateStations.length - 1]?.distanceFromStart || totalDistance;
           actualPrice = fullDistance > 0 ? (train.price * totalDistance / fullDistance) : train.price;
           console.log('Calculated price from main station to intermediate:', actualPrice);
         }
-        // Dacă pleacă dintr-o stație intermediară și ajunge în stația principală
+        // Daca pleaca dintr-o statie intermediara si ajunge in statia principala
         else if (fromIndex !== -1 && train.to._id.toString() === toStationObj._id.toString()) {
           const fromDistance = intermediateStations[fromIndex].distanceFromStart;
           const fullDistance = intermediateStations[intermediateStations.length - 1]?.distanceFromStart || 1;
@@ -270,10 +270,10 @@ exports.createBooking = async (req, res) => {
       }
     }
     
-    // Calculează prețul total folosind prețul corect pentru secțiunea călătorită
+    // Calculeaza pretul total folosind pretul corect pentru sectiunea calatorita
     const totalPrice = actualPrice * passengers.length;
     
-    // Creează snapshot-ul trenului cu datele reale (inclusiv pentru secțiuni intermediare)
+    // Creeaza snapshot-ul trenului cu datele reale (inclusiv pentru sectiuni intermediare)
     const trainSnapshot = {
       trainNumber: train.trainNumber,
       type: train.type,
@@ -295,7 +295,7 @@ exports.createBooking = async (req, res) => {
     
     console.log('TrainSnapshot to be saved:', JSON.stringify(trainSnapshot, null, 2));
 
-    // Generează bookingNumber
+    // Genereaza bookingNumber
     const generateBookingNumber = () => {
       const year = new Date().getFullYear();
       const timestamp = Date.now();
@@ -303,7 +303,7 @@ exports.createBooking = async (req, res) => {
       return `REZ-${year}-${String(timestamp).slice(-6)}${random}`;
     };
 
-    // Creează rezervarea cu locurile alocate
+    // Creeaza rezervarea cu locurile alocate
     const booking = new Booking({
       bookingNumber: generateBookingNumber(),
       userId,
@@ -334,7 +334,7 @@ exports.createBooking = async (req, res) => {
       trainSnapshotPrice: booking.trainSnapshot.price
     });
 
-    // Generează QR code URL
+    // Genereaza QR code URL
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(booking.bookingNumber)}`;
     booking.qrCode = qrCodeUrl;
     await booking.save();
@@ -396,10 +396,10 @@ exports.getUserBookings = async (req, res) => {
     }
 
     const formattedBookings = bookings.map(booking => {
-      // Folosește trainSnapshot dacă există și are date valide, altfel folosește datele din train populate
+      // Foloseste trainSnapshot daca exista si are date valide, altfel foloseste datele din train populate
       let trainData;
       
-      // Verifică dacă trainSnapshot există și are structură validă
+      // Verifica daca trainSnapshot exista si are structura valida
       const hasValidSnapshot = booking.trainSnapshot && 
                                typeof booking.trainSnapshot === 'object' &&
                                booking.trainSnapshot.trainNumber &&
@@ -409,7 +409,7 @@ exports.getUserBookings = async (req, res) => {
                                booking.trainSnapshot.to !== 'N/A';
       
       if (hasValidSnapshot) {
-        // Folosește snapshot-ul salvat
+        // Foloseste snapshot-ul salvat
       trainData = {
         trainNumber: booking.trainSnapshot.trainNumber,
         type: booking.trainSnapshot.type,
@@ -422,7 +422,7 @@ exports.getUserBookings = async (req, res) => {
       
       console.log('getBookingById - using trainSnapshot:', trainData);
       } else if (booking.train && typeof booking.train === 'object' && booking.train.trainNumber) {
-        // Folosește datele din tren populate
+        // Foloseste datele din tren populate
         const train = booking.train;
         const fromName = train.from?.name || 
                         (typeof train.from === 'string' ? train.from : null) ||
@@ -498,7 +498,7 @@ exports.getBookingById = async (req, res) => {
       });
     }
 
-    // Verifică dacă utilizatorul are dreptul să vadă această rezervare
+    // Verifica daca utilizatorul are dreptul sa vada aceasta rezervare
     if (booking.userId._id.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
@@ -506,7 +506,7 @@ exports.getBookingById = async (req, res) => {
       });
     }
 
-    // Folosește trainSnapshot dacă există și are date valide, altfel folosește datele din train populate
+    // Foloseste trainSnapshot daca exista si are date valide, altfel foloseste datele din train populate
     let trainData;
     
     console.log('getBookingById - checking trainSnapshot:', {
@@ -516,7 +516,7 @@ exports.getBookingById = async (req, res) => {
       trainSnapshotTo: booking.trainSnapshot?.to
     });
     
-    // Verifică dacă trainSnapshot are nume valide (nu "N/A" sau undefined)
+    // Verifica daca trainSnapshot are nume valide (nu "N/A" sau undefined)
     const hasValidSnapshot = booking.trainSnapshot && 
                              booking.trainSnapshot.trainNumber &&
                              booking.trainSnapshot.from &&
@@ -527,7 +527,7 @@ exports.getBookingById = async (req, res) => {
     console.log('getBookingById - hasValidSnapshot:', hasValidSnapshot);
     
     if (hasValidSnapshot) {
-      // Folosește snapshot-ul salvat (care conține datele pentru secțiunea intermediară)
+      // Foloseste snapshot-ul salvat (care contine datele pentru sectiunea intermediara)
       trainData = {
         trainNumber: booking.trainSnapshot.trainNumber,
         type: booking.trainSnapshot.type,
@@ -540,7 +540,7 @@ exports.getBookingById = async (req, res) => {
       
       console.log('getBookingById - using trainSnapshot:', trainData);
     } else if (booking.train && typeof booking.train === 'object' && booking.train.trainNumber) {
-      // Folosește datele din tren populate
+      // Foloseste datele din tren populate
       const train = booking.train;
       const fromName = train.from?.name || 
                       (typeof train.from === 'string' ? train.from : null) ||
@@ -570,11 +570,11 @@ exports.getBookingById = async (req, res) => {
       };
     }
 
-    // Generează QR code dacă nu există
+    // Genereaza QR code daca nu exista
     let qrCode = booking.qrCode;
     if (!qrCode) {
       qrCode = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(booking.bookingNumber || booking._id.toString())}`;
-      // Salvează QR code-ul generat în baza de date
+      // Salveaza QR code-ul generat in baza de date
       booking.qrCode = qrCode;
       await booking.save();
     }
@@ -623,7 +623,7 @@ exports.cancelBooking = async (req, res) => {
       });
     }
 
-    // Verifică dacă utilizatorul are dreptul să anuleze această rezervare
+    // Verifica daca utilizatorul are dreptul sa anuleze aceasta rezervare
     if (booking.userId.toString() !== req.user._id.toString() && req.user.role !== 'administrator') {
       return res.status(403).json({
         success: false,
@@ -644,7 +644,7 @@ exports.cancelBooking = async (req, res) => {
     booking.cancellationReason = 'Renuntare voluntara';
     await booking.save();
 
-    // Actualizează și plata dacă există
+    // Actualizeaza si plata daca exista
     const Payment = require('../models/Payment');
     const payment = await Payment.findOne({ bookingId: booking._id });
     if (payment && payment.status === 'finalizat') {
