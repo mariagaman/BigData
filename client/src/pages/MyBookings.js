@@ -32,9 +32,9 @@ const MyBookings = () => {
   }, [isAuthenticated]);
 
   const formatTime = (time) => {
-    return new Date(time).toLocaleTimeString('ro-RO', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(time).toLocaleTimeString('ro-RO', {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -64,7 +64,7 @@ const MyBookings = () => {
     if (window.confirm('Ești sigur că vrei să anulezi această rezervare? Suma va fi rambursată.')) {
       try {
         await cancelBookingAPI(bookingId);
-        // Reincarca lista de rezervari pentru a obtine datele actualizate
+
         const updatedBookings = await getUserBookings();
         setUserBookings(updatedBookings);
         alert('Rezervarea a fost anulată cu succes. Suma va fi rambursată.');
@@ -155,10 +155,10 @@ const MyBookings = () => {
                     Rezervare #{booking.bookingNumber || booking.id}
                   </div>
                   <div className={`booking-status ${
-                    booking.status === 'anulata' ? 'cancelled' : 
+                    booking.status === 'anulata' ? 'cancelled' :
                     isUpcoming(booking) ? 'upcoming' : 'past'
                   }`}>
-                    {booking.status === 'anulata' ? '✗ Anulată' : 
+                    {booking.status === 'anulata' ? '✗ Anulată' :
                      isUpcoming(booking) ? '✓ Activă' : '✓ Finalizată'}
                   </div>
                 </div>
@@ -202,7 +202,7 @@ const MyBookings = () => {
                     🎟️ Vezi bilet
                   </Link>
                   {isUpcoming(booking) && booking.status !== 'anulata' && (
-                    <button 
+                    <button
                       className="btn-danger"
                       onClick={() => handleCancelBooking(booking.id)}
                     >

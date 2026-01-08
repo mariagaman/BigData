@@ -3,9 +3,9 @@ import '../styles/BookingSummary.css';
 
 const BookingSummary = ({ train, passengers, totalPrice }) => {
   const formatTime = (time) => {
-    return new Date(time).toLocaleTimeString('ro-RO', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(time).toLocaleTimeString('ro-RO', {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -21,13 +21,13 @@ const BookingSummary = ({ train, passengers, totalPrice }) => {
   return (
     <div className="booking-summary">
       <h3 className="summary-title">Rezumatul Călătoriei</h3>
-      
+
       <div className="summary-section">
         <div className="summary-row">
           <span className="summary-label">Tren:</span>
           <span className="summary-value">{train.type} {train.trainNumber}</span>
         </div>
-        
+
         <div className="summary-route">
           <div className="summary-station">
             <div className="station-name">{train.from}</div>
@@ -39,7 +39,7 @@ const BookingSummary = ({ train, passengers, totalPrice }) => {
             <div className="station-time">{formatTime(train.arrivalTime)}</div>
           </div>
         </div>
-        
+
         <div className="summary-row">
           <span className="summary-label">Data:</span>
           <span className="summary-value">{formatDate(train.departureTime)}</span>
@@ -51,7 +51,7 @@ const BookingSummary = ({ train, passengers, totalPrice }) => {
           <span className="summary-label">Pasageri:</span>
           <span className="summary-value">{passengers}</span>
         </div>
-        
+
         <div className="summary-row">
           <span className="summary-label">Preț pe bilet:</span>
           <span className="summary-value">{train.price} RON</span>

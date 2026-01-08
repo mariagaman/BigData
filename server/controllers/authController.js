@@ -1,14 +1,12 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-// Generare token JWT
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET || 'your-secret-key-here-change-in-production', {
     expiresIn: '7d'
   });
 };
 
-// Login
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -21,7 +19,7 @@ exports.login = async (req, res) => {
     }
 
     const user = await User.findOne({ email: email.toLowerCase() });
-    
+
     if (!user) {
       console.log(`Login attempt failed: User not found for email: ${email.toLowerCase()}`);
       return res.status(401).json({
@@ -31,7 +29,7 @@ exports.login = async (req, res) => {
     }
 
     const isMatch = await user.comparePassword(password);
-    
+
     if (!isMatch) {
       console.log(`Login attempt failed: Invalid password for email: ${email.toLowerCase()}`);
       return res.status(401).json({
@@ -40,10 +38,9 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Daca parola nu este hash-uita dar este corecta, hash-uieste-o acum
     if (!user.password.startsWith('$2')) {
       console.log('Password is not hashed, hashing now for user:', user.email);
-      user.password = password; // Va fi hash-uita de pre('save')
+      user.password = password;
       await user.save();
     }
 
@@ -72,7 +69,6 @@ exports.login = async (req, res) => {
   }
 };
 
-// Register
 exports.register = async (req, res) => {
   try {
     const { email, password, firstName, lastName, phone } = req.body;
@@ -91,9 +87,8 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Verifica daca utilizatorul exista deja
     const existingUser = await User.findOne({ email: email.toLowerCase() });
-    
+
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -134,11 +129,10 @@ exports.register = async (req, res) => {
   }
 };
 
-// Get current user
 exports.getCurrentUser = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
-    
+
     res.json({
       success: true,
       user: {
@@ -159,19 +153,18 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
-// Update user
 exports.updateUser = async (req, res) => {
   try {
     const { firstName, lastName, phone } = req.body;
-    
+
     const user = await User.findById(req.user._id);
-    
+
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
     if (phone !== undefined) user.phone = phone;
-    
+
     await user.save();
-    
+
     res.json({
       success: true,
       user: {
@@ -192,7 +185,6 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// Change password
 exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
@@ -227,9 +219,8 @@ exports.changePassword = async (req, res) => {
 
     const user = await User.findById(req.user._id);
 
-    // Verifica parola curenta
     const isMatch = await user.comparePassword(currentPassword);
-    
+
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -237,8 +228,7 @@ exports.changePassword = async (req, res) => {
       });
     }
 
-    // Actualizeaza parola
-    user.password = newPassword; // Va fi hash-uita automat de pre('save')
+    user.password = newPassword;
     await user.save();
 
     res.json({
@@ -254,14 +244,12 @@ exports.changePassword = async (req, res) => {
   }
 };
 
-// Delete user account
 exports.deleteUser = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // Gaseste utilizatorul
     const user = await User.findById(userId);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -269,7 +257,6 @@ exports.deleteUser = async (req, res) => {
       });
     }
 
-    // Sterge utilizatorul din baza de date
     await User.findByIdAndDelete(userId);
 
     res.json({

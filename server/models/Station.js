@@ -31,7 +31,6 @@ const stationSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Indexuri
 stationSchema.index({ name: 1 });
 stationSchema.index({ code: 1 });
 stationSchema.index({ city: 1 });

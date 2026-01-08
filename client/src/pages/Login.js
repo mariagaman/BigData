@@ -7,12 +7,12 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  
+
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -30,31 +30,31 @@ const Login = () => {
 
   const validate = () => {
     const newErrors = {};
-    
+
     if (!formData.email) {
       newErrors.email = 'Email-ul este obligatoriu';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Email invalid';
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'Parola este obligatorie';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Parola trebuie să aibă minim 6 caractere';
     }
-    
+
     return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validate();
-    
+
     if (Object.keys(newErrors).length === 0) {
       setLoading(true);
       try {
         const response = await login(formData.email, formData.password, rememberMe);
-        // Daca utilizatorul este administrator, redirectioneaza la dashboard
+
         if (response.user?.role === 'administrator') {
           navigate('/admin/dashboard', { replace: true });
         } else {
@@ -135,8 +135,8 @@ const Login = () => {
 
             <div className="form-options">
               <label className="remember-me">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
@@ -144,8 +144,8 @@ const Login = () => {
               </label>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn-primary auth-submit"
               disabled={loading}
             >

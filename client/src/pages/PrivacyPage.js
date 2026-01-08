@@ -14,7 +14,7 @@ const PrivacyPage = () => {
           <section>
             <h2>1. Introducere</h2>
             <p>
-              RailMate respectă confidențialitatea utilizatorilor și se angajează să protejeze datele personale colectate 
+              RailMate respectă confidențialitatea utilizatorilor și se angajează să protejeze datele personale colectate
               în conformitate cu Regulamentul General privind Protecția Datelor (GDPR) și legislația română aplicabilă.
             </p>
           </section>
@@ -74,7 +74,7 @@ const PrivacyPage = () => {
           <section>
             <h2>6. Securitatea Datelor</h2>
             <p>
-              Implementăm măsuri tehnice și organizaționale adecvate pentru a proteja datele dvs. personale împotriva 
+              Implementăm măsuri tehnice și organizaționale adecvate pentru a proteja datele dvs. personale împotriva
               accesului neautorizat, pierderii sau distrugerii. Acestea includ:
             </p>
             <ul>
@@ -88,7 +88,7 @@ const PrivacyPage = () => {
           <section>
             <h2>7. Stocarea Datelor</h2>
             <p>
-              Păstrăm datele dvs. personale doar atât timp cât este necesar pentru scopurile pentru care au fost colectate, 
+              Păstrăm datele dvs. personale doar atât timp cât este necesar pentru scopurile pentru care au fost colectate,
               sau conform cerințelor legale. După expirarea perioadei de păstrare, datele sunt șterse sau anonimizate în siguranță.
             </p>
           </section>
@@ -110,8 +110,8 @@ const PrivacyPage = () => {
           <section>
             <h2>9. Cookie-uri</h2>
             <p>
-              Utilizăm cookie-uri pentru a îmbunătăți experiența dvs. pe platformă. Cookie-urile ne ajută să vă 
-              recunoaștem când reveniți și să personalizăm serviciile. Puteți gestiona preferințele pentru cookie-uri 
+              Utilizăm cookie-uri pentru a îmbunătăți experiența dvs. pe platformă. Cookie-urile ne ajută să vă
+              recunoaștem când reveniți și să personalizăm serviciile. Puteți gestiona preferințele pentru cookie-uri
               în setările browserului dvs.
             </p>
           </section>
@@ -119,7 +119,7 @@ const PrivacyPage = () => {
           <section>
             <h2>10. Modificări ale Politicii</h2>
             <p>
-              Ne rezervăm dreptul de a actualiza această Politică de Confidențialitate. 
+              Ne rezervăm dreptul de a actualiza această Politică de Confidențialitate.
               Vă vom notifica despre modificări semnificative prin email sau prin notificări pe platformă.
             </p>
           </section>
@@ -127,12 +127,12 @@ const PrivacyPage = () => {
           <section>
             <h2>11. Contact</h2>
             <p>
-              Pentru întrebări despre prelucrarea datelor dvs. personale sau pentru a exercita drepturile dvs., 
-              vă rugăm să ne contactați la adresa de email dedicată protecției datelor sau prin intermediul 
+              Pentru întrebări despre prelucrarea datelor dvs. personale sau pentru a exercita drepturile dvs.,
+              vă rugăm să ne contactați la adresa de email dedicată protecției datelor sau prin intermediul
               secțiunii de contact de pe platformă.
             </p>
             <p>
-              De asemenea, aveți dreptul de a depune o plângere la Autoritatea Națională de Supraveghere a Prelucrării 
+              De asemenea, aveți dreptul de a depune o plângere la Autoritatea Națională de Supraveghere a Prelucrării
               Datelor cu Caracter Personal (ANSPDCP) dacă considerați că prelucrarea datelor dvs. încalcă legislația aplicabilă.
             </p>
           </section>

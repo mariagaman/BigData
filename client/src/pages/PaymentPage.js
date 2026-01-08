@@ -8,28 +8,26 @@ import '../styles/PaymentPage.css';
 const PaymentPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [pendingBooking, setPendingBooking] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
-  // Date pentru card
+
   const [cardData, setCardData] = useState({
     cardNumber: '',
     cardHolder: '',
     expiryDate: '',
     cvv: ''
   });
-  
-  // Date pentru PayPal
+
   const [paypalData, setPaypalData] = useState({
     email: '',
     password: ''
   });
 
   useEffect(() => {
-    // Preia datele rezervării din sessionStorage
+
     const storedBooking = sessionStorage.getItem('pendingBooking');
     if (storedBooking) {
       try {
@@ -63,14 +61,12 @@ const PaymentPage = () => {
   const handleCardChange = (e) => {
     const { name, value } = e.target;
     let formattedValue = value;
-    
-    // Formatare automată pentru card number (spații la fiecare 4 cifre)
+
     if (name === 'cardNumber') {
       formattedValue = value.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim();
-      if (formattedValue.length > 19) return; // Max 16 cifre + 3 spații
+      if (formattedValue.length > 19) return;
     }
-    
-    // Formatare pentru expiry date (MM/YY)
+
     if (name === 'expiryDate') {
       formattedValue = value.replace(/\D/g, '');
       if (formattedValue.length >= 2) {
@@ -78,12 +74,11 @@ const PaymentPage = () => {
       }
       if (formattedValue.length > 5) return;
     }
-    
-    // CVV doar 3 cifre
+
     if (name === 'cvv') {
       formattedValue = value.replace(/\D/g, '').substring(0, 3);
     }
-    
+
     setCardData({ ...cardData, [name]: formattedValue });
     setError('');
   };
@@ -107,17 +102,16 @@ const PaymentPage = () => {
     if (!cardData.cvv || cardData.cvv.length !== 3) {
       return 'CVV-ul trebuie să aibă 3 cifre';
     }
-    
-    // Verificare simplă de validitate (fictivă)
+
     const month = parseInt(cardData.expiryDate.split('/')[0]);
     const year = parseInt('20' + cardData.expiryDate.split('/')[1]);
     const currentDate = new Date();
     const expiryDate = new Date(year, month - 1);
-    
+
     if (expiryDate < currentDate) {
       return 'Cardul a expirat';
     }
-    
+
     return null;
   };
 
@@ -132,11 +126,10 @@ const PaymentPage = () => {
   };
 
   const simulatePayment = async (method) => {
-    // Simulare procesare plată
+
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        // Simulare verificare fictivă
-        // Pentru card: verifică că numărul nu începe cu 0 sau 1 (simulare eșec)
+
         if (method === 'card') {
           const cardNumber = cardData.cardNumber.replace(/\s/g, '');
           if (cardNumber.startsWith('0') || cardNumber.startsWith('1')) {
@@ -144,22 +137,20 @@ const PaymentPage = () => {
             return;
           }
         }
-        
-        // Pentru PayPal: verifică că email-ul nu este "fail@paypal.com"
+
         if (method === 'paypal') {
           if (paypalData.email.toLowerCase() === 'fail@paypal.com') {
             reject({ message: 'Autentificare PayPal eșuată. Verifică datele.' });
             return;
           }
         }
-        
-        // Simulare succes
+
         resolve({
           transactionId: 'TXN-' + Date.now(),
           status: 'completed',
           timestamp: new Date().toISOString()
         });
-      }, 2000); // Simulare întârziere de 2 secunde
+      }, 2000);
     });
   };
 
@@ -169,7 +160,7 @@ const PaymentPage = () => {
     setLoading(true);
 
     try {
-      // Validare
+
       let validationError = null;
       if (paymentMethod === 'card') {
         validationError = validateCard();
@@ -183,10 +174,8 @@ const PaymentPage = () => {
         return;
       }
 
-      // Simulare procesare plată
       const paymentResult = await simulatePayment(paymentMethod);
 
-      // Pregătește datele pentru salvare
       const bookingData = {
         train: train,
         passengers: passengers,
@@ -205,20 +194,16 @@ const PaymentPage = () => {
         totalPrice: train.price * passengers.length
       };
 
-      // Creează rezervarea în baza de date
-      // Folosește stațiile din searchParams (care sunt stațiile reale căutate)
-      // sau fallback la train.from/to dacă searchParams nu există
       const actualFrom = searchParams.from || train.from;
       const actualTo = searchParams.to || train.to;
-      
-      // Folosește prețul și orele din tren (care sunt deja calculate pentru secțiunea intermediară)
+
       const bookingResponse = await createBooking({
         trainId: train.id,
-        from: actualFrom, // Stația reală de plecare din căutare (poate fi intermediară)
-        to: actualTo, // Stația reală de sosire din căutare (poate fi intermediară)
-        departureTime: train.departureTime, // Ora reală de plecare (deja calculată pentru secțiune)
-        arrivalTime: train.arrivalTime, // Ora reală de sosire (deja calculată pentru secțiune)
-        price: train.price, // Prețul corect pentru secțiunea călătorită (deja calculat)
+        from: actualFrom,
+        to: actualTo,
+        departureTime: train.departureTime,
+        arrivalTime: train.arrivalTime,
+        price: train.price,
         passengers: passengers.map(p => ({
           firstName: p.firstName,
           lastName: p.lastName,
@@ -233,22 +218,18 @@ const PaymentPage = () => {
       console.log('Booking response:', bookingResponse);
       console.log('Booking ID:', bookingResponse.id, 'type:', typeof bookingResponse.id);
 
-      // Verifică dacă ID-ul este valid ObjectId (24 caractere hex)
       if (!bookingResponse.id || typeof bookingResponse.id !== 'string' || bookingResponse.id.length !== 24) {
         throw new Error('ID-ul rezervării este invalid. Te rugăm să reîncerci procesul de rezervare.');
       }
 
-      // Creează plata în baza de date
       await createPayment({
-        bookingId: bookingResponse.id, // Este deja string ObjectId
+        bookingId: bookingResponse.id,
         method: paymentMethod,
         transactionId: paymentResult.transactionId
       });
-      
-      // Șterge datele temporare
+
       sessionStorage.removeItem('pendingBooking');
-      
-      // Navigare la confirmare cu ID-ul rezervării
+
       navigate(`/confirmation?bookingId=${bookingResponse.id}`);
     } catch (error) {
       setError(error.message || 'Plata a eșuat. Te rugăm să încerci din nou.');

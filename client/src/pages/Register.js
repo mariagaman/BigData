@@ -7,7 +7,7 @@ const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { register } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -16,7 +16,7 @@ const Register = () => {
     password: '',
     confirmPassword: ''
   });
-  
+
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -34,46 +34,46 @@ const Register = () => {
 
   const validate = () => {
     const newErrors = {};
-    
+
     if (!formData.firstName.trim()) {
       newErrors.firstName = 'Prenumele este obligatoriu';
     }
-    
+
     if (!formData.lastName.trim()) {
       newErrors.lastName = 'Numele este obligatoriu';
     }
-    
+
     if (!formData.email) {
       newErrors.email = 'Email-ul este obligatoriu';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Email invalid';
     }
-    
+
     if (formData.phone && !/^[0-9]{10}$/.test(formData.phone)) {
       newErrors.phone = 'Număr de telefon invalid (10 cifre)';
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'Parola este obligatorie';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Parola trebuie să aibă minim 6 caractere';
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Parolele nu coincid';
     }
-    
+
     if (!acceptTerms) {
       newErrors.terms = 'Trebuie să accepți termenii și condițiile';
     }
-    
+
     return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validate();
-    
+
     if (Object.keys(newErrors).length === 0) {
       setLoading(true);
       try {
@@ -248,8 +248,8 @@ const Register = () => {
               {errors.terms && <span className="error-message">{errors.terms}</span>}
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn-primary auth-submit"
               disabled={loading}
             >

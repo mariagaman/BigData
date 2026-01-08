@@ -196,8 +196,8 @@ const SearchResults = () => {
                 )}
               </div>
               {sortedTrains.map((train) => (
-                <TrainCard 
-                  key={train.id} 
+                <TrainCard
+                  key={train.id}
                   train={train}
                 />
               ))}

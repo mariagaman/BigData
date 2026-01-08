@@ -5,16 +5,14 @@ const connectDB = require('./config/db');
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Logging middleware pentru debugging
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   if (req.body && Object.keys(req.body).length > 0) {
-    // Nu logam parola completa pentru securitate
+
     const logBody = { ...req.body };
     if (logBody.password) {
       logBody.password = '***';
@@ -24,16 +22,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rute de test
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'RailMate API Server',
     status: 'running',
     version: '1.0.0'
   });
 });
 
-// Rute API
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/stations', require('./routes/stations'));
 app.use('/api/trains', require('./routes/trains'));
@@ -41,7 +37,6 @@ app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/admin', require('./routes/admin'));
 
-// Endpoint temporar pentru debugging - listeaza utilizatorii
 app.get('/api/debug/users', async (req, res) => {
   try {
     const User = require('./models/User');
@@ -52,38 +47,36 @@ app.get('/api/debug/users', async (req, res) => {
   }
 });
 
-// Endpoint temporar pentru debugging - listeaza rezervarile unui utilizator (dupa userId sau email)
 app.get('/api/debug/bookings/user/:identifier', async (req, res) => {
   try {
     const Booking = require('./models/Booking');
     const User = require('./models/User');
     const { identifier } = req.params;
-    
-    // Verifica daca identifier-ul este un email sau un ObjectId
+
     let user;
     if (identifier.includes('@')) {
-      // Este un email
+
       user = await User.findOne({ email: identifier.toLowerCase() });
     } else {
-      // Este un ObjectId
+
       user = await User.findById(identifier);
     }
-    
+
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Utilizator negăsit' 
+      return res.status(404).json({
+        success: false,
+        message: 'Utilizator negăsit'
       });
     }
-    
+
     const bookings = await Booking.find({ userId: user._id })
       .populate('train', 'trainNumber type from to departureTime arrivalTime price')
       .populate('userId', 'email firstName lastName')
       .sort({ bookingDate: -1 })
       .select('-__v');
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       user: {
         id: user._id,
         email: user.email,
@@ -91,14 +84,13 @@ app.get('/api/debug/bookings/user/:identifier', async (req, res) => {
         lastName: user.lastName
       },
       count: bookings.length,
-      bookings 
+      bookings
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// Endpoint temporar pentru debugging - listeaza toate rezervarile
 app.get('/api/debug/bookings', async (req, res) => {
   try {
     const Booking = require('./models/Booking');
@@ -108,18 +100,17 @@ app.get('/api/debug/bookings', async (req, res) => {
       .sort({ bookingDate: -1 })
       .limit(50)
       .select('-__v');
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       count: bookings.length,
-      bookings 
+      bookings
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// Endpoint temporar pentru debugging - listeaza toate trenurile
 app.get('/api/debug/trains', async (req, res) => {
   try {
     const Train = require('./models/Train');
@@ -129,9 +120,9 @@ app.get('/api/debug/trains', async (req, res) => {
       .populate('route.intermediateStations.station', 'name city')
       .limit(20)
       .select('-wagons');
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       count: trains.length,
       trains: trains.map(train => ({
         id: train._id,
@@ -152,38 +143,37 @@ app.get('/api/debug/trains', async (req, res) => {
       }))
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
 
-// Endpoint temporar pentru debugging - verifica token-ul si userId-ul
 app.get('/api/debug/auth-check', async (req, res) => {
   try {
     const auth = require('./middleware/auth');
     const jwt = require('jsonwebtoken');
-    
+
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
-      return res.json({ 
-        success: false, 
+      return res.json({
+        success: false,
         message: 'No token provided',
         hasToken: false
       });
     }
-    
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-here-change-in-production');
     const User = require('./models/User');
     const user = await User.findById(decoded.userId).select('email firstName lastName _id');
-    
+
     const Booking = require('./models/Booking');
     const bookingsCount = await Booking.countDocuments({ userId: user._id });
-    
-    res.json({ 
+
+    res.json({
       success: true,
       token: {
         decoded: decoded,
@@ -204,21 +194,19 @@ app.get('/api/debug/auth-check', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
 
-// Port
 const PORT = process.env.PORT || 5001;
 
-// Porneste serverul si conecteaza baza de date
 app.listen(PORT, async () => {
   console.log(`🚂 Server RailMate rulează pe portul ${PORT}`);
-  // Conectare la baza de date dupa ce serverul porneste
+
   await connectDB();
 });
 

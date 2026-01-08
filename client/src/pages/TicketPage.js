@@ -5,7 +5,6 @@ import jsPDF from 'jspdf';
 import QRCodeLib from 'qrcode';
 import '../styles/TicketPage.css';
 
-// Component simplu pentru generarea QR code (folosind un serviciu online)
 const QRCode = ({ value }) => {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(value)}`;
   return (
@@ -71,9 +70,9 @@ const TicketPage = () => {
   }
 
   const formatTime = (time) => {
-    return new Date(time).toLocaleTimeString('ro-RO', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(time).toLocaleTimeString('ro-RO', {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -94,10 +93,8 @@ const TicketPage = () => {
     });
   };
 
-  // Generam un cod unic pentru bilet
   const ticketCode = booking.bookingNumber || `RAILMATE-${booking.id}-${booking.train.trainNumber}-${formatDateShort(booking.train.departureTime).replace(/\//g, '')}`;
-  
-  // Date pentru QR code - folosim bookingNumber ca identificator principal
+
   const qrData = JSON.stringify({
     bookingId: booking.id,
     bookingNumber: booking.bookingNumber || booking.id,
@@ -107,15 +104,13 @@ const TicketPage = () => {
     date: booking.train.departureTime,
     code: ticketCode
   });
-  
-  // Genereaza URL pentru QR code daca nu exista deja
+
   const qrCodeUrl = booking.qrCode || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
 
   const handlePrint = () => {
     window.print();
   };
 
-  // Functie pentru eliminarea diacriticelor
   const removeDiacritics = (str) => {
     if (!str) return '';
     return str
@@ -141,32 +136,28 @@ const TicketPage = () => {
         format: 'a4'
       });
 
-      // Culori
-      const primaryColor = [138, 43, 226]; // Purple
+      const primaryColor = [138, 43, 226];
       const textColor = [50, 50, 50];
       const lightGray = [240, 240, 240];
 
-      // Header cu logo si numar bilet
       doc.setFillColor(...primaryColor);
       doc.rect(0, 0, 210, 40, 'F');
-      
+
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(24);
       doc.setFont('helvetica', 'bold');
       doc.text('RailMate', 15, 20);
-      
+
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
       doc.text(`Bilet #${booking.bookingNumber || booking.id}`, 150, 20);
-      const statusText = booking.status === 'confirmed' ? 'Confirmat' : 
+      const statusText = booking.status === 'confirmed' ? 'Confirmat' :
                         booking.status === 'anulata' ? 'Anulat' : booking.status === 'confirmata' ? 'Confirmată' : booking.status;
       doc.text(`Status: ${removeDiacritics(statusText)}`, 150, 28);
 
-      // Resetare culoare text
       doc.setTextColor(...textColor);
       let yPos = 50;
 
-      // Informatii despre traseu
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.text('Detalii calatorie', 15, yPos);
@@ -174,8 +165,7 @@ const TicketPage = () => {
 
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
-      
-      // Plecare
+
       doc.setFillColor(...lightGray);
       doc.rect(15, yPos, 85, 30, 'F');
       doc.setFont('helvetica', 'bold');
@@ -189,7 +179,6 @@ const TicketPage = () => {
       doc.setFont('helvetica', 'normal');
       doc.text(removeDiacritics(formatDate(booking.train.departureTime)), 20, yPos + 28);
 
-      // Sosire
       doc.setFillColor(...lightGray);
       doc.rect(110, yPos, 85, 30, 'F');
       doc.setFont('helvetica', 'bold');
@@ -205,7 +194,6 @@ const TicketPage = () => {
 
       yPos += 40;
 
-      // Detalii tren
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.text('Detalii tren', 15, yPos);
@@ -224,15 +212,13 @@ const TicketPage = () => {
 
       yPos += 15;
 
-      // QR Code
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.text('Cod QR Bilet', 15, yPos);
       yPos += 8;
 
-      // Genereaza QR code-ul direct
       try {
-        // Genereaza QR code-ul ca data URL (base64)
+
         const qrDataString = booking.bookingNumber || booking.id.toString();
         const qrDataUrl = await QRCodeLib.toDataURL(qrDataString, {
           width: 200,
@@ -243,16 +229,14 @@ const TicketPage = () => {
           }
         });
 
-        // Adauga QR code-ul in PDF
         doc.addImage(qrDataUrl, 'PNG', 15, yPos, 40, 40);
-        
-        // Adauga codul biletului langa QR code
+
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
         doc.text(`Cod bilet: ${booking.bookingNumber || booking.id}`, 60, yPos + 20);
       } catch (error) {
         console.error('Error generating QR code:', error);
-        // Fallback - doar text
+
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.text(`Cod bilet: ${booking.bookingNumber || booking.id}`, 15, yPos + 5);
@@ -260,7 +244,6 @@ const TicketPage = () => {
 
       yPos += 50;
 
-      // Lista pasagerilor
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.text('Pasageri', 15, yPos);
@@ -268,28 +251,25 @@ const TicketPage = () => {
 
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      
+
       booking.passengers.forEach((passenger, index) => {
         if (yPos > 250) {
           doc.addPage();
           yPos = 20;
         }
-        
-        // Calculeaza inaltimea necesara pentru acest pasager
-        let passengerHeight = 8; // Inaltime minima
+
+        let passengerHeight = 8;
         if (passenger.email) passengerHeight += 5;
         if (passenger.phone) passengerHeight += 5;
         if (passenger.wagonNumber && passenger.seatNumber) passengerHeight += 5;
-        
-        // Deseneaza fundalul gri pentru intreaga sectiune
+
         doc.setFillColor(...lightGray);
         doc.rect(15, yPos - 5, 180, passengerHeight, 'F');
-        
-        // Nume pasager
+
         doc.setFont('helvetica', 'bold');
         doc.text(`${index + 1}. ${removeDiacritics(passenger.firstName)} ${removeDiacritics(passenger.lastName)}`, 20, yPos + 3);
         doc.setFont('helvetica', 'normal');
-        
+
         let passengerY = yPos + 8;
         if (passenger.email) {
           doc.text(`Email: ${passenger.email}`, 20, passengerY);
@@ -303,28 +283,25 @@ const TicketPage = () => {
           doc.text(`Vagon: ${passenger.wagonNumber}, Loc: ${passenger.seatNumber}`, 20, passengerY);
           passengerY += 5;
         }
-        
+
         yPos += passengerHeight + 3;
       });
 
-      // Footer pe fiecare pagina
       const pageCount = doc.internal.pages.length - 1;
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
-        
-        // Text footer centrat
+
         const footerText = 'Acest bilet este valabil doar pentru data si trenul specificat. Prezinta biletul la control.';
         const pageWidth = doc.internal.pageSize.getWidth();
         const textWidth = doc.getTextWidth(footerText);
         const xPos = (pageWidth - textWidth) / 2;
-        
+
         doc.text(footerText, xPos, 285, { align: 'left' });
         doc.text(`Pagina ${i} din ${pageCount}`, 105, 290, { align: 'center' });
       }
 
-      // Descarca PDF-ul
       const fileName = `Bilet_${booking.bookingNumber || booking.id}_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(fileName);
     } catch (error) {
@@ -411,12 +388,12 @@ const TicketPage = () => {
 
             <div className="ticket-qr-section">
               <div className="qr-code-wrapper">
-                <img 
-                  src={qrCodeUrl} 
-                  alt="QR Code" 
+                <img
+                  src={qrCodeUrl}
+                  alt="QR Code"
                   className="qr-code-image"
                   onError={(e) => {
-                    // Fallback daca imaginea nu se incarca
+
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'block';
                   }}

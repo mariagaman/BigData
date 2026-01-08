@@ -87,7 +87,6 @@ input, select, textarea {
   transition: var(--transition);
 }
 
-/* Utility classes */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -100,7 +99,6 @@ input, select, textarea {
   padding: 0 2rem;
 }
 
-/* Loading spinner */
 .loading {
   display: flex;
   flex-direction: column;
@@ -125,7 +123,6 @@ input, select, textarea {
   100% { transform: rotate(360deg); }
 }
 
-/* Alert messages */
 .alert {
   padding: 1rem;
   border-radius: var(--border-radius);
@@ -156,7 +153,6 @@ input, select, textarea {
   border: 1px solid #90caf9;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   h1 { font-size: 2rem; }
   h2 { font-size: 1.75rem; }

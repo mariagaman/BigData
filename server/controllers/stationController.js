@@ -1,10 +1,9 @@
 const Station = require('../models/Station');
 
-// Get all stations
 exports.getAllStations = async (req, res) => {
   try {
     const stations = await Station.find().sort({ name: 1 });
-    
+
     res.json({
       success: true,
       stations
@@ -18,18 +17,17 @@ exports.getAllStations = async (req, res) => {
   }
 };
 
-// Get station by ID
 exports.getStationById = async (req, res) => {
   try {
     const station = await Station.findById(req.params.id);
-    
+
     if (!station) {
       return res.status(404).json({
         success: false,
         message: 'Stație negăsită'
       });
     }
-    
+
     res.json({
       success: true,
       station

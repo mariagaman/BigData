@@ -104,14 +104,13 @@ const ProfilePage = () => {
   const handleDeleteAccount = async () => {
     const confirmMessage = 'Ești sigur că vrei să ștergi contul? Această acțiune este permanentă și nu poate fi anulată.';
     const confirmDelete = window.confirm(confirmMessage);
-    
+
     if (!confirmDelete) {
       return;
     }
 
-    // Confirmare suplimentara
     const secondConfirm = window.confirm('Această acțiune va șterge permanent contul tău și toate datele asociate. Ești absolut sigur?');
-    
+
     if (!secondConfirm) {
       return;
     }
@@ -133,7 +132,7 @@ const ProfilePage = () => {
             {user?.firstName?.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase() || 'U'}
           </div>
           <h1>
-            {user?.firstName && user?.lastName 
+            {user?.firstName && user?.lastName
               ? `${user.firstName} ${user.lastName}`
               : user?.name || 'Profilul meu'}
           </h1>
@@ -207,7 +206,7 @@ const ProfilePage = () => {
                 <div className="info-item">
                   <span className="info-label">Nume complet:</span>
                   <span className="info-value">
-                    {user?.firstName && user?.lastName 
+                    {user?.firstName && user?.lastName
                       ? `${user.firstName} ${user.lastName}`
                       : user?.name || 'N/A'}
                   </span>

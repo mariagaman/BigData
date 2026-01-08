@@ -52,7 +52,6 @@ const paymentSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Indexuri (bookingId și transactionId au deja index din unique: true)
 paymentSchema.index({ userId: 1 });
 paymentSchema.index({ status: 1 });
 

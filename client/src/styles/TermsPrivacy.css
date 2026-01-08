@@ -71,7 +71,6 @@
   font-weight: 600;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .terms-privacy-page {
     padding: 1rem 0.5rem;

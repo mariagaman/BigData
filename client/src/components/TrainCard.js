@@ -8,9 +8,9 @@ const TrainCard = ({ train }) => {
   const { isAuthenticated } = useAuth();
 
   const formatTime = (time) => {
-    return new Date(time).toLocaleTimeString('ro-RO', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(time).toLocaleTimeString('ro-RO', {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -33,11 +33,11 @@ const TrainCard = ({ train }) => {
 
   const handleBooking = () => {
     if (!isAuthenticated) {
-      // Dacă nu este autentificat, redirecționează la login cu locația curentă
+
       navigate('/login', { state: { from: { pathname: `/booking/${train.id}` } } });
       return;
     }
-    // Salvează datele trenului (inclusiv pentru secțiuni intermediare) în sessionStorage
+
     sessionStorage.setItem('selectedTrain', JSON.stringify({
       id: train.id,
       from: train.from,
@@ -109,7 +109,7 @@ const TrainCard = ({ train }) => {
       </div>
 
       <div className="train-footer">
-        <button 
+        <button
           className="book-button"
           onClick={handleBooking}
           disabled={train.availableSeats === 0}

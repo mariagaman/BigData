@@ -104,7 +104,6 @@
   width: 80%;
 }
 
-/* Auth Links */
 .auth-links {
   margin-left: 0.5rem;
 }
@@ -125,7 +124,6 @@
   color: var(--text-light) !important;
 }
 
-/* User Menu */
 .user-menu-container {
   position: relative;
   margin-left: 0.5rem;

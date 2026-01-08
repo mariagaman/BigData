@@ -49,7 +49,6 @@
   align-items: start;
 }
 
-/* Filters Sidebar */
 .filters-sidebar {
   background-color: var(--bg-primary);
   padding: 1.5rem;
@@ -105,7 +104,6 @@
   font-size: 0.95rem;
 }
 
-/* Results List */
 .results-list {
   min-height: 400px;
 }

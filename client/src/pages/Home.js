@@ -9,14 +9,12 @@ const Home = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
-  // Redirectioneaza administratorii la dashboard
   useEffect(() => {
     if (isAuthenticated && user?.role === 'administrator') {
       navigate('/admin/dashboard', { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
 
-  // Daca utilizatorul este administrator, nu afisa continutul
   if (isAuthenticated && user?.role === 'administrator') {
     return null;
   }
@@ -58,12 +56,12 @@ const Home = () => {
           <p className="hero-subtitle">
             Rezervă bilete de tren rapid, simplu și la cele mai bune prețuri
           </p>
-          
+
           <div className="search-container">
             <SearchForm />
           </div>
         </div>
-        
+
         <div className="hero-image">
           <img src={trainIcon} alt="Tren RailMate" className="train-illustration" />
         </div>

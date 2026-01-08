@@ -66,7 +66,6 @@
   color: var(--primary-dark);
 }
 
-/* Calendar Dropdown */
 .calendar-dropdown {
   position: absolute;
   top: calc(100% + 0.5rem);
@@ -92,7 +91,6 @@
   }
 }
 
-/* Header */
 .calendar-header {
   display: flex;
   align-items: center;
@@ -137,7 +135,6 @@
   transform: scale(0.95);
 }
 
-/* Weekdays */
 .weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -155,7 +152,6 @@
   letter-spacing: 0.5px;
 }
 
-/* Days Grid */
 .days-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -237,7 +233,6 @@
   border-color: transparent;
 }
 
-/* Footer */
 .calendar-footer {
   display: flex;
   gap: 0.65rem;
@@ -284,7 +279,6 @@
   box-shadow: 0 4px 10px rgba(156, 39, 176, 0.4);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .calendar-dropdown {
     left: 50%;

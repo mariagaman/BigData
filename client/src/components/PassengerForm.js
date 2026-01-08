@@ -17,7 +17,7 @@ const PassengerForm = ({ passengerIndex, onUpdate }) => {
     const updatedPassenger = { ...passenger, [name]: value };
     setPassenger(updatedPassenger);
     onUpdate(passengerIndex, updatedPassenger);
-    
+
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -47,7 +47,7 @@ const PassengerForm = ({ passengerIndex, onUpdate }) => {
   return (
     <div className="passenger-form">
       <h4>Pasagerul {passengerIndex + 1}</h4>
-      
+
       <div className="form-row">
         <div className="form-group">
           <label htmlFor={`firstName-${passengerIndex}`}>Prenume *</label>

@@ -8,7 +8,7 @@ import '../styles/SearchForm.css';
 const SearchForm = ({ inline = false }) => {
   const navigate = useNavigate();
   const { searchParams, updateSearchParams } = useBooking();
-  
+
   const [formData, setFormData] = useState({
     from: searchParams.from || '',
     to: searchParams.to || '',
@@ -20,7 +20,6 @@ const SearchForm = ({ inline = false }) => {
   const [stations, setStations] = useState([]);
   const [loadingStations, setLoadingStations] = useState(true);
 
-  // Preia stațiile din API
   useEffect(() => {
     const fetchStations = async () => {
       try {
@@ -28,7 +27,7 @@ const SearchForm = ({ inline = false }) => {
         setStations(stationsData);
       } catch (error) {
         console.error('Error fetching stations:', error);
-        // Fallback la lista hardcodată în caz de eroare
+
         setStations([
           { name: 'București Nord' },
           { name: 'Cluj-Napoca' },
@@ -54,7 +53,6 @@ const SearchForm = ({ inline = false }) => {
     fetchStations();
   }, []);
 
-  // Actualizăm formData când searchParams se schimbă
   useEffect(() => {
     if (searchParams.from || searchParams.to || searchParams.date) {
       setFormData({
@@ -76,7 +74,7 @@ const SearchForm = ({ inline = false }) => {
 
   const validate = () => {
     const newErrors = {};
-    
+
     if (!formData.from) newErrors.from = 'Selectează orașul de plecare';
     if (!formData.to) newErrors.to = 'Selectează orașul de sosire';
     if (formData.from === formData.to) {
@@ -84,22 +82,22 @@ const SearchForm = ({ inline = false }) => {
     }
     if (!formData.date) newErrors.date = 'Selectează data călătoriei';
     if (formData.passengers < 1) newErrors.passengers = 'Minim 1 pasager';
-    
+
     const selectedDate = new Date(formData.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (selectedDate < today) {
       newErrors.date = 'Data nu poate fi în trecut';
     }
-    
+
     return newErrors;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = validate();
-    
+
     if (Object.keys(newErrors).length === 0) {
       updateSearchParams(formData);
       navigate('/search');
@@ -138,9 +136,9 @@ const SearchForm = ({ inline = false }) => {
               ))}
             </select>
 
-            <button 
-              type="button" 
-              className="swap-button" 
+            <button
+              type="button"
+              className="swap-button"
               onClick={swapCities}
               title="Inversează orașele"
             >

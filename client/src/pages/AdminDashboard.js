@@ -30,7 +30,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-    // Reseteaza pagina cand se schimba filtrele
+
     if (activeTab === 'bookings') {
       setBookingsPage(1);
     }
@@ -116,7 +116,7 @@ const AdminDashboard = () => {
       status: '',
       paymentStatus: ''
     });
-    // Reseteaza si paginile cand se reseteaza filtrele
+
     setBookingsPage(1);
     setUsersPage(1);
     setTrainsPage(1);
@@ -151,18 +151,15 @@ const AdminDashboard = () => {
     const startPage = Math.max(1, currentPage - 2);
     const endPage = Math.min(totalPages, currentPage + 2);
 
-    // Adauga prima pagina
     if (startPage > 1) {
       pages.push(1);
       if (startPage > 2) pages.push('...');
     }
 
-    // Adauga paginile din jurul paginii curente
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
 
-    // Adauga ultima pagina
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) pages.push('...');
       pages.push(totalPages);
@@ -236,7 +233,6 @@ const AdminDashboard = () => {
     );
   }
 
-  // Pregateste datele pentru diagrame
   const monthlyBookingsData = stats.monthlyBookings?.map(item => ({
     month: `${item._id.month}/${item._id.year}`,
     bookings: item.count,
@@ -339,7 +335,7 @@ const AdminDashboard = () => {
 
       {activeTab === 'overview' && (
         <div className="dashboard-content">
-          {/* Statistici generale */}
+          {}
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-icon">👥</div>
@@ -385,7 +381,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Diagrame */}
+          {}
           <div className="charts-grid">
             <div className="chart-card">
               <h3>Rezervări pe Lună</h3>
@@ -453,7 +449,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Top trenuri */}
+          {}
           <div className="top-trains">
             <h3>Top 5 Trenuri Cele Mai Căutate</h3>
             <div className="trains-list">

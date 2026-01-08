@@ -9,7 +9,7 @@ const Footer = () => {
           <h3>RailMate</h3>
           <p>Partenerul tău de încredere pentru călătorii cu trenul</p>
         </div>
-        
+
         <div className="footer-section">
           <h4>Linkuri Rapide</h4>
           <ul>
@@ -18,7 +18,7 @@ const Footer = () => {
             <li><a href="/my-bookings">Rezervările Mele</a></li>
           </ul>
         </div>
-        
+
         <div className="footer-section">
           <h4>Informații</h4>
           <ul>
@@ -27,7 +27,7 @@ const Footer = () => {
             <li><a href="#privacy">Politica de Confidențialitate</a></li>
           </ul>
         </div>
-        
+
         <div className="footer-section">
           <h4>Contact</h4>
           <ul>
@@ -37,7 +37,7 @@ const Footer = () => {
           </ul>
         </div>
       </div>
-      
+
       <div className="footer-bottom">
         <p>&copy; 2025 RailMate. Toate drepturile rezervate.</p>
       </div>

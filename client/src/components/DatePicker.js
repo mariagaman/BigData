@@ -4,8 +4,7 @@ import '../styles/DatePicker.css';
 const DatePicker = ({ value, onChange, min, className, id, name }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  
-  // Inițializăm selectedDate corect pentru a evita problemele cu timezone
+
   const getInitialDate = () => {
     if (!value) return null;
     const [year, month, day] = value.split('-').map(Number);
@@ -13,7 +12,7 @@ const DatePicker = ({ value, onChange, min, className, id, name }) => {
     date.setHours(0, 0, 0, 0);
     return date;
   };
-  
+
   const [selectedDate, setSelectedDate] = useState(getInitialDate());
   const calendarRef = useRef(null);
 
@@ -37,7 +36,7 @@ const DatePicker = ({ value, onChange, min, className, id, name }) => {
 
   useEffect(() => {
     if (value) {
-      // Parsează data din format YYYY-MM-DD și o creează în timezone-ul local
+
       const [year, month, day] = value.split('-').map(Number);
       const date = new Date(year, month - 1, day);
       date.setHours(0, 0, 0, 0);
@@ -55,8 +54,7 @@ const DatePicker = ({ value, onChange, min, className, id, name }) => {
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
-    // Zile din luna precedentă
+
     for (let i = 0; i < startingDayOfWeek; i++) {
       const prevMonthLastDay = new Date(year, month, 0).getDate();
       days.push({
@@ -66,7 +64,6 @@ const DatePicker = ({ value, onChange, min, className, id, name }) => {
       });
     }
 
-    // Zile din luna curentă
     for (let day = 1; day <= daysInMonth; day++) {
       days.push({
         day,
@@ -75,7 +72,6 @@ const DatePicker = ({ value, onChange, min, className, id, name }) => {
       });
     }
 
-    // Zile din luna următoare
     const remainingDays = 42 - days.length;
     for (let day = 1; day <= remainingDays; day++) {
       days.push({
@@ -97,21 +93,21 @@ const DatePicker = ({ value, onChange, min, className, id, name }) => {
   };
 
   const handleDateSelect = (date) => {
-    // Setăm ora la 0 în timezone-ul local pentru a evita problemele cu timezone
+
     const localDate = new Date(date);
     localDate.setHours(0, 0, 0, 0);
-    
+
     if (min) {
       const minDate = new Date(min);
       minDate.setHours(0, 0, 0, 0);
-      
+
       if (localDate < minDate) {
         return;
       }
     }
 
     setSelectedDate(localDate);
-    // Formatăm data manual pentru a evita problemele cu timezone-ul UTC
+
     const year = localDate.getFullYear();
     const month = String(localDate.getMonth() + 1).padStart(2, '0');
     const day = String(localDate.getDate()).padStart(2, '0');

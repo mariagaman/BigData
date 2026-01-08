@@ -102,7 +102,6 @@ const trainSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Indexuri
 trainSchema.index({ from: 1, to: 1, departureTime: 1 });
 trainSchema.index({ trainNumber: 1 });
 trainSchema.index({ date: 1 });

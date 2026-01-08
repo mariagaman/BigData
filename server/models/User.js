@@ -35,25 +35,22 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Hash parola inainte de salvare
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
-  
+
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-// Metoda pentru compararea parolelor
 userSchema.methods.comparePassword = async function(candidatePassword) {
   try {
-    // Verifica daca parola este hash-uita (bcrypt hash incepe cu $2a$, $2b$, $2y$)
+
     if (this.password.startsWith('$2')) {
-      // Compara cu bcrypt
+
       return await bcrypt.compare(candidatePassword, this.password);
     } else {
-      // Parola nu este hash-uita (plain text) - compara direct
-      // Aceasta este doar pentru migrare - in productie toate parolele ar trebui sa fie hash-uite
+
       return this.password === candidatePassword;
     }
   } catch (error) {

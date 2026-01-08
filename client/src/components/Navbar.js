@@ -27,7 +27,7 @@ const Navbar = () => {
           <span className="logo-text">RailMate</span>
         </Link>
 
-        <button 
+        <button
           className="menu-toggle"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
@@ -41,8 +41,8 @@ const Navbar = () => {
           {isAuthenticated && user?.role === 'administrator' ? (
             <>
               <li>
-                <Link 
-                  to="/admin/dashboard" 
+                <Link
+                  to="/admin/dashboard"
                   className={`nav-link ${isActive('/admin/dashboard') ? 'active' : ''}`}
                   onClick={() => setMenuOpen(false)}
                 >
@@ -53,8 +53,8 @@ const Navbar = () => {
           ) : (
             <>
               <li>
-                <Link 
-                  to="/" 
+                <Link
+                  to="/"
                   className={`nav-link ${isActive('/') ? 'active' : ''}`}
                   onClick={() => setMenuOpen(false)}
                 >
@@ -62,8 +62,8 @@ const Navbar = () => {
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/search" 
+                <Link
+                  to="/search"
                   className={`nav-link ${isActive('/search') ? 'active' : ''}`}
                   onClick={() => setMenuOpen(false)}
                 >
@@ -72,8 +72,8 @@ const Navbar = () => {
               </li>
               {isAuthenticated && (
                 <li>
-                  <Link 
-                    to="/my-bookings" 
+                  <Link
+                    to="/my-bookings"
                     className={`nav-link ${isActive('/my-bookings') ? 'active' : ''}`}
                     onClick={() => setMenuOpen(false)}
                   >
@@ -83,12 +83,12 @@ const Navbar = () => {
               )}
             </>
           )}
-          
+
           {!isAuthenticated ? (
             <>
               <li className="auth-links">
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className="nav-link login-link"
                   onClick={() => setMenuOpen(false)}
                 >
@@ -96,8 +96,8 @@ const Navbar = () => {
                 </Link>
               </li>
               <li className="auth-links">
-                <Link 
-                  to="/register" 
+                <Link
+                  to="/register"
                   className="nav-link register-link"
                   onClick={() => setMenuOpen(false)}
                 >
@@ -107,26 +107,26 @@ const Navbar = () => {
             </>
           ) : (
             <li className="user-menu-container">
-              <button 
+              <button
                 className="user-menu-button"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
               >
                 <span className="user-avatar">👤</span>
                 <span className="user-name">
-                  {user?.firstName && user?.lastName 
+                  {user?.firstName && user?.lastName
                     ? `${user.firstName} ${user.lastName}`
                     : user?.name || 'Utilizator'}
                 </span>
                 <span className="dropdown-arrow">▼</span>
               </button>
-              
+
               {userMenuOpen && (
                 <div className="user-dropdown">
                   <div className="user-info">
                     <div className="user-avatar-large">👤</div>
                     <div className="user-details">
                       <div className="user-name-large">
-                        {user?.firstName && user?.lastName 
+                        {user?.firstName && user?.lastName
                           ? `${user.firstName} ${user.lastName}`
                           : user?.name || 'Utilizator'}
                       </div>
@@ -135,8 +135,8 @@ const Navbar = () => {
                   </div>
                   <div className="dropdown-divider"></div>
                   {user?.role !== 'administrator' && (
-                    <Link 
-                      to="/my-bookings" 
+                    <Link
+                      to="/my-bookings"
                       className="dropdown-item"
                       onClick={() => {
                         setUserMenuOpen(false);
@@ -147,8 +147,8 @@ const Navbar = () => {
                       Rezervările mele
                     </Link>
                   )}
-                  <Link 
-                    to="/profile" 
+                  <Link
+                    to="/profile"
                     className="dropdown-item"
                     onClick={() => {
                       setUserMenuOpen(false);
@@ -159,7 +159,7 @@ const Navbar = () => {
                     Setări cont
                   </Link>
                   <div className="dropdown-divider"></div>
-                  <button 
+                  <button
                     className="dropdown-item logout-item"
                     onClick={handleLogout}
                   >

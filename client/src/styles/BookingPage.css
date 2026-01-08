@@ -119,7 +119,6 @@
   font-size: 0.9rem;
 }
 
-/* Payment Methods */
 .payment-methods {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -174,7 +173,6 @@
   font-weight: 600;
 }
 
-/* Terms Checkbox */
 .terms-checkbox {
   display: flex;
   align-items: flex-start;
@@ -202,7 +200,6 @@
   text-decoration: underline;
 }
 
-/* Booking Actions */
 .booking-actions {
   display: flex;
   gap: 1rem;

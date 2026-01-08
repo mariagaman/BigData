@@ -1,7 +1,6 @@
 const Payment = require('../models/Payment');
 const Booking = require('../models/Booking');
 
-// Create payment
 exports.createPayment = async (req, res) => {
   try {
     const { bookingId, method, transactionId } = req.body;
@@ -16,27 +15,24 @@ exports.createPayment = async (req, res) => {
       });
     }
 
-    // Convertește bookingId la string si verifica daca este ObjectId valid
     const mongoose = require('mongoose');
     let bookingIdObj;
-    
+
     try {
-      // Convertește la string
+
       bookingIdObj = String(bookingId);
-      
-      // Verifica daca este un ObjectId valid (24 caractere hex)
+
       if (!mongoose.Types.ObjectId.isValid(bookingIdObj)) {
         console.error('Invalid ObjectId:', bookingIdObj, 'type:', typeof bookingId);
         console.error('BookingId length:', bookingIdObj.length, 'expected: 24');
-        
-        // Daca este un numar (timestamp), inseamna ca nu este ObjectId valid
+
         if (typeof bookingId === 'number' || !isNaN(Number(bookingId))) {
           return res.status(400).json({
             success: false,
             message: 'ID-ul rezervării este invalid. Te rugăm să reîncerci procesul de rezervare.'
           });
         }
-        
+
         return res.status(400).json({
           success: false,
           message: 'ID-ul rezervării este invalid'
@@ -52,7 +48,7 @@ exports.createPayment = async (req, res) => {
 
     console.log('Looking for booking with ID:', bookingIdObj);
     let booking = await Booking.findById(bookingIdObj);
-    
+
     if (!booking) {
       console.error('Booking not found with ID:', bookingIdObj);
       return res.status(404).json({
@@ -68,7 +64,6 @@ exports.createPayment = async (req, res) => {
       });
     }
 
-    // Verifica daca utilizatorul are dreptul sa plateasca pentru aceasta rezervare
     if (booking.userId.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
@@ -76,7 +71,6 @@ exports.createPayment = async (req, res) => {
       });
     }
 
-    // Verifica daca exista deja o plata pentru aceasta rezervare
     const existingPayment = await Payment.findOne({ bookingId });
     if (existingPayment) {
       return res.status(400).json({
@@ -85,7 +79,6 @@ exports.createPayment = async (req, res) => {
       });
     }
 
-    // Creeaza plata
     const payment = new Payment({
       bookingId,
       userId,
@@ -98,7 +91,6 @@ exports.createPayment = async (req, res) => {
 
     await payment.save();
 
-    // Actualizeaza statusul rezervarii
     booking.paymentStatus = 'finalizat';
     await booking.save();
 
@@ -123,7 +115,6 @@ exports.createPayment = async (req, res) => {
   }
 };
 
-// Get payment by booking ID
 exports.getPaymentByBookingId = async (req, res) => {
   try {
     const { bookingId } = req.params;
@@ -139,7 +130,6 @@ exports.getPaymentByBookingId = async (req, res) => {
       });
     }
 
-    // Verifica daca utilizatorul are dreptul sa vada aceasta plata
     if (payment.userId.toString() !== userId.toString() && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,

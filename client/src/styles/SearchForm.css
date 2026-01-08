@@ -110,7 +110,6 @@
   box-sizing: border-box !important;
 }
 
-
 .swap-button {
   background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
   color: var(--text-light);
@@ -165,7 +164,6 @@
   box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
 }
 
-/* Stiluri personalizate pentru input date */
 .form-group input[type="date"] {
   position: relative;
   font-family: inherit;
@@ -188,7 +186,6 @@
   transform: scale(1.1);
 }
 
-/* Stiluri pentru calendar dropdown */
 input[type="date"]::-webkit-datetime-edit {
   padding: 0.25rem;
 }
@@ -225,7 +222,6 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus {
   outline: none;
 }
 
-/* Firefox */
 input[type="date"]::-moz-calendar-picker-indicator {
   cursor: pointer;
   filter: invert(53%) sepia(70%) saturate(4478%) hue-rotate(274deg) brightness(85%) contrast(93%);

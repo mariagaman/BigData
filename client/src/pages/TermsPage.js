@@ -14,7 +14,7 @@ const TermsPage = () => {
           <section>
             <h2>1. Acceptarea Termenilor</h2>
             <p>
-              Prin accesarea și utilizarea platformei RailMate, acceptați să respectați și să fiți obligați de acești Termeni și Condiții. 
+              Prin accesarea și utilizarea platformei RailMate, acceptați să respectați și să fiți obligați de acești Termeni și Condiții.
               Dacă nu sunteți de acord cu oricare dintre termenii prezentați, vă rugăm să nu utilizați serviciile noastre.
             </p>
           </section>
@@ -22,7 +22,7 @@ const TermsPage = () => {
           <section>
             <h2>2. Descrierea Serviciilor</h2>
             <p>
-              RailMate este o platformă online care permite utilizatorilor să rezerve și să cumpere bilete de tren. 
+              RailMate este o platformă online care permite utilizatorilor să rezerve și să cumpere bilete de tren.
               Oferim servicii de intermediere între utilizatori și operatorii de transport feroviar.
             </p>
           </section>
@@ -42,8 +42,8 @@ const TermsPage = () => {
           <section>
             <h2>4. Rezervări și Plăți</h2>
             <p>
-              Rezervările sunt supuse disponibilității și confirmării de către operatorul de transport. 
-              Plățile trebuie efectuate conform metodelor acceptate de platformă. 
+              Rezervările sunt supuse disponibilității și confirmării de către operatorul de transport.
+              Plățile trebuie efectuate conform metodelor acceptate de platformă.
               Prețurile pot varia și sunt afișate în timp real.
             </p>
           </section>
@@ -51,7 +51,7 @@ const TermsPage = () => {
           <section>
             <h2>5. Anulări și Rambursări</h2>
             <p>
-              Politica de anulare și rambursare depinde de operatorul de transport și de tipul biletului cumpărat. 
+              Politica de anulare și rambursare depinde de operatorul de transport și de tipul biletului cumpărat.
               Vă rugăm să consultați condițiile specifice înainte de a finaliza rezervarea.
             </p>
           </section>
@@ -70,7 +70,7 @@ const TermsPage = () => {
           <section>
             <h2>7. Proprietate Intelectuală</h2>
             <p>
-              Toate conținuturile, design-ul, logo-urile și alte materiale de pe platformă sunt proprietatea RailMate 
+              Toate conținuturile, design-ul, logo-urile și alte materiale de pe platformă sunt proprietatea RailMate
               sau a partenerilor noștri și sunt protejate de legile privind drepturile de autor.
             </p>
           </section>
@@ -78,7 +78,7 @@ const TermsPage = () => {
           <section>
             <h2>8. Limitarea Răspunderii</h2>
             <p>
-              RailMate nu poate fi considerat responsabil pentru întârzieri, anulări sau alte probleme care apar din cauza 
+              RailMate nu poate fi considerat responsabil pentru întârzieri, anulări sau alte probleme care apar din cauza
               operatorilor de transport sau a altor circumstanțe independente de controlul nostru.
             </p>
           </section>
@@ -86,7 +86,7 @@ const TermsPage = () => {
           <section>
             <h2>9. Modificări ale Termenilor</h2>
             <p>
-              Ne rezervăm dreptul de a modifica acești Termeni și Condiții în orice moment. 
+              Ne rezervăm dreptul de a modifica acești Termeni și Condiții în orice moment.
               Modificările vor fi comunicate utilizatorilor și vor intra în vigoare imediat după publicare.
             </p>
           </section>
@@ -94,7 +94,7 @@ const TermsPage = () => {
           <section>
             <h2>10. Legea Aplicabilă</h2>
             <p>
-              Acești Termeni și Condiții sunt guvernați de legile României. 
+              Acești Termeni și Condiții sunt guvernați de legile României.
               Orice dispută va fi rezolvată de instanțele competente din România.
             </p>
           </section>
@@ -102,7 +102,7 @@ const TermsPage = () => {
           <section>
             <h2>11. Contact</h2>
             <p>
-              Pentru întrebări sau nelămuriri privind acești Termeni și Condiții, vă rugăm să ne contactați 
+              Pentru întrebări sau nelămuriri privind acești Termeni și Condiții, vă rugăm să ne contactați
               prin intermediul secțiunii de contact de pe platformă.
             </p>
           </section>

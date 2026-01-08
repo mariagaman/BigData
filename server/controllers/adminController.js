@@ -3,14 +3,12 @@ const Train = require('../models/Train');
 const Booking = require('../models/Booking');
 const Station = require('../models/Station');
 
-// Obtine statistici generale
 exports.getDashboardStats = async (req, res) => {
   try {
     console.log('getDashboardStats - Starting...');
     const { startDate, endDate, status, paymentStatus } = req.query;
     console.log('getDashboardStats - Query params:', { startDate, endDate, status, paymentStatus });
 
-    // Construieste query-ul pentru filtrare
     const bookingQuery = {};
     if (startDate || endDate) {
       bookingQuery.bookingDate = {};
@@ -30,20 +28,16 @@ exports.getDashboardStats = async (req, res) => {
       bookingQuery.paymentStatus = paymentStatus;
     }
 
-    // Statistici generale
     const totalUsers = await User.countDocuments();
     const totalTrains = await Train.countDocuments();
     const totalBookings = await Booking.countDocuments(bookingQuery);
-    
-    // Statistici bookings
+
     const confirmedBookings = await Booking.countDocuments({ ...bookingQuery, status: 'confirmata' });
     const cancelledBookings = await Booking.countDocuments({ ...bookingQuery, status: 'anulata' });
-    
-    // Statistici plati
+
     const completedPayments = await Booking.countDocuments({ ...bookingQuery, paymentStatus: 'finalizat' });
     const refundedPayments = await Booking.countDocuments({ ...bookingQuery, paymentStatus: 'rambursat' });
-    
-    // Venituri totale
+
     let revenueData = [];
     let totalRevenue = 0;
     try {
@@ -57,7 +51,6 @@ exports.getDashboardStats = async (req, res) => {
       totalRevenue = 0;
     }
 
-    // Bookings pe luna (ultimele 12 luni)
     let monthlyBookings = [];
     try {
       monthlyBookings = await Booking.aggregate([
@@ -80,7 +73,6 @@ exports.getDashboardStats = async (req, res) => {
       monthlyBookings = [];
     }
 
-    // Bookings pe status
     let bookingsByStatus = [];
     try {
       bookingsByStatus = await Booking.aggregate([
@@ -97,7 +89,6 @@ exports.getDashboardStats = async (req, res) => {
       bookingsByStatus = [];
     }
 
-    // Bookings pe metoda de plata
     let bookingsByPaymentMethod = [];
     try {
       bookingsByPaymentMethod = await Booking.aggregate([
@@ -115,7 +106,6 @@ exports.getDashboardStats = async (req, res) => {
       bookingsByPaymentMethod = [];
     }
 
-    // Top 5 trenuri cele mai cautate (toate rezervarile, nu doar confirmate)
     let topTrains = [];
     try {
       topTrains = await Booking.aggregate([
@@ -124,8 +114,8 @@ exports.getDashboardStats = async (req, res) => {
           $group: {
             _id: '$train',
             count: { $sum: 1 },
-            totalPassengers: { 
-              $sum: { 
+            totalPassengers: {
+              $sum: {
                 $ifNull: [
                   { $size: { $ifNull: ['$passengers', []] } },
                   0
@@ -142,10 +132,9 @@ exports.getDashboardStats = async (req, res) => {
       topTrains = [];
     }
 
-    // Populeaza detaliile trenurilor
     const topTrainsWithDetails = await Promise.all(
       topTrains
-        .filter(item => item._id) // Filtreaza item-urile cu _id null
+        .filter(item => item._id)
         .map(async (item) => {
           try {
             const train = await Train.findById(item._id).populate('from', 'name').populate('to', 'name');
@@ -164,11 +153,9 @@ exports.getDashboardStats = async (req, res) => {
           }
         })
     );
-    
-    // Filtreaza null-urile
+
     const filteredTopTrains = topTrainsWithDetails.filter(item => item !== null);
 
-    // Utilizatori noi pe luna
     let newUsersByMonth = [];
     try {
       newUsersByMonth = await User.aggregate([
@@ -230,22 +217,21 @@ exports.getDashboardStats = async (req, res) => {
   }
 };
 
-// Obtine lista de bookings cu filtre
 exports.getBookings = async (req, res) => {
   try {
-    const { 
-      page = 1, 
-      limit = 20, 
-      startDate, 
-      endDate, 
-      status, 
+    const {
+      page = 1,
+      limit = 20,
+      startDate,
+      endDate,
+      status,
       paymentStatus,
       trainId,
       userId
     } = req.query;
 
     const query = {};
-    
+
     if (startDate || endDate) {
       query.bookingDate = {};
       if (startDate) {
@@ -293,7 +279,6 @@ exports.getBookings = async (req, res) => {
   }
 };
 
-// Obtine lista de utilizatori
 exports.getUsers = async (req, res) => {
   try {
     const { page = 1, limit = 20, role, search } = req.query;
@@ -337,7 +322,6 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// Obtine lista de trenuri
 exports.getTrains = async (req, res) => {
   try {
     const { page = 1, limit = 20, type, search } = req.query;

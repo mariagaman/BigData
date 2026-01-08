@@ -3,7 +3,6 @@ const router = express.Router();
 const adminController = require('../controllers/adminController');
 const auth = require('../middleware/auth');
 
-// Middleware pentru verificarea rolului de administrator
 const isAdmin = async (req, res, next) => {
   try {
     console.log('isAdmin middleware - Checking role:', req.user?.role);
@@ -32,7 +31,6 @@ const isAdmin = async (req, res, next) => {
   }
 };
 
-// Toate rutele necesita autentificare si rol de administrator
 router.use((req, res, next) => {
   console.log('Admin router - Request received:', req.method, req.path);
   next();

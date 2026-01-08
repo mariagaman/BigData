@@ -10,7 +10,6 @@
   min-height: calc(100vh - 70px);
 }
 
-/* Global button styles */
 .btn-primary,
 .btn-secondary,
 .btn-outline,
@@ -86,7 +85,6 @@ button:disabled:hover {
   transform: none;
 }
 
-/* Form styles */
 .form-group {
   margin-bottom: 1.25rem;
 }
@@ -173,7 +171,6 @@ button:disabled:hover {
   margin-top: 0.25rem;
 }
 
-/* Stiluri pentru input number */
 .number-input-wrapper {
   position: relative;
   width: 100%;
@@ -193,7 +190,6 @@ button:disabled:hover {
   margin: 0;
 }
 
-/* Butoane sageti mov custom */
 .number-controls {
   position: absolute;
   right: 0.5rem;
@@ -229,7 +225,6 @@ button:disabled:hover {
   transform: scale(1);
 }
 
-/* Responsive utilities */
 @media (max-width: 768px) {
   .main-content {
     padding-top: 60px;

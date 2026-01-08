@@ -33,63 +33,63 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/search" element={<SearchResults />} />
-                <Route 
-                  path="/booking/:trainId" 
+                <Route
+                  path="/booking/:trainId"
                   element={
                     <ProtectedRoute>
                       <BookingPage />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/payment" 
+                <Route
+                  path="/payment"
                   element={
                     <ProtectedRoute>
                       <PaymentPage />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/confirmation" 
+                <Route
+                  path="/confirmation"
                   element={
                     <ProtectedRoute>
                       <ConfirmationPage />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/my-bookings" 
+                <Route
+                  path="/my-bookings"
                   element={
                     <ProtectedRoute>
                       <MyBookings />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/profile" 
+                <Route
+                  path="/profile"
                   element={
                     <ProtectedRoute>
                       <ProfilePage />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/ticket/:bookingId" 
+                <Route
+                  path="/ticket/:bookingId"
                   element={
                     <ProtectedRoute>
                       <TicketPage />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
-                <Route 
-                  path="/admin/dashboard" 
+                <Route
+                  path="/admin/dashboard"
                   element={
                     <ProtectedRoute>
                       <AdminDashboard />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
               </Routes>
             </main>

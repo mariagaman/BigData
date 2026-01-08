@@ -13,7 +13,7 @@ const ConfirmationPage = () => {
 
   useEffect(() => {
     const bookingId = searchParams.get('bookingId');
-    
+
     if (!bookingId) {
       navigate('/');
       return;
@@ -59,9 +59,9 @@ const ConfirmationPage = () => {
   }
 
   const formatTime = (time) => {
-    return new Date(time).toLocaleTimeString('ro-RO', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(time).toLocaleTimeString('ro-RO', {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -88,7 +88,7 @@ const ConfirmationPage = () => {
         </div>
 
         <div className="success-icon">✅</div>
-        
+
         <h1>Rezervare confirmată!</h1>
         <p className="confirmation-message">
           Biletele tale au fost rezervate cu succes. Vei primi un email de confirmare la adresa specificată.
@@ -102,7 +102,7 @@ const ConfirmationPage = () => {
 
           <div className="journey-details">
             <h2>Detalii călătorie</h2>
-            
+
             <div className="detail-row">
               <span className="detail-label">Tren:</span>
               <span className="detail-value">
@@ -144,7 +144,7 @@ const ConfirmationPage = () => {
 
           <div className="payment-details">
             <h2>Detalii plată</h2>
-            
+
             <div className="detail-row">
               <span className="detail-label">Metodă plată:</span>
               <span className="detail-value">

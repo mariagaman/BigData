@@ -121,13 +121,11 @@ const bookingSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Indexuri (bookingNumber are deja index din unique: true)
 bookingSchema.index({ userId: 1, status: 1, bookingDate: -1 });
 bookingSchema.index({ train: 1 });
 bookingSchema.index({ status: 1 });
 bookingSchema.index({ bookingDate: -1 });
 
-// Generare automata bookingNumber inainte de salvare
 bookingSchema.pre('save', async function(next) {
   if (!this.bookingNumber) {
     this.bookingNumber = `RAILMATE-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;

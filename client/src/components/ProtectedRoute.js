@@ -16,7 +16,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    // Redirecționează la login, dar salvează locația curentă
+
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
