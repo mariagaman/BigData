@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const Booking = require('../models/Booking');
+const Payment = require('../models/Payment');
 const jwt = require('jsonwebtoken');
 
 const generateToken = (userId) => {
@@ -257,6 +259,8 @@ exports.deleteUser = async (req, res) => {
       });
     }
 
+    await Payment.deleteMany({ userId: userId });
+    await Booking.deleteMany({ userId: userId });
     await User.findByIdAndDelete(userId);
 
     res.json({
