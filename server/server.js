@@ -205,7 +205,7 @@ app.get('/api/debug/auth-check', async (req, res) => {
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, async () => {
-  console.log(`🚂 Server RailMate rulează pe portul ${PORT}`);
+  console.log(`Server RailMate is running on port ${PORT}`);
 
   await connectDB();
 });

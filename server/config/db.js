@@ -7,12 +7,12 @@ const connectDB = async () => {
 
     const conn = await mongoose.connect(mongoURI);
 
-    console.log(`✅ MongoDB conectat: ${conn.connection.host}`);
+    console.log(`Connected to MongoDB: ${conn.connection.host}`);
 
     return conn;
   } catch (error) {
-    console.error('❌ Eroare la conectarea la MongoDB:', error.message);
-    console.error('⚠️  Serverul pornește fără conexiune la baza de date. Asigură-te că MongoDB rulează.');
+    console.error('Error connecting to MongoDB:', error.message);
+    console.error('Server is running without connection to the database. Make sure MongoDB is running.');
 
   }
 };
